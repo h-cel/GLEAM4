@@ -1,0 +1,9 @@
+name: gleam4_paper
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pandas=2.2.*
+  - xarray
+  - seaborn=0.13.*
+  - ipykernel
