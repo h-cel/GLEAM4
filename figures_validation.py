@@ -102,22 +102,6 @@ ax.set_xlabel("Alternative model")
 
 # %% Final figure: Violinplot for KGE, one with all models combined
 fig, ax = plt.subplots(figsize=(4.5, 5))
-# Add fill for GLEAM4
-sns.violinplot(
-    data=df_metrics[df_metrics["model"] == "GLEAM4"][["KGE"]],
-    y="KGE",
-    hue=1,
-    hue_order=[1, 2],
-    ax=ax,
-    dodge=True,
-    split=split,
-    inner=None,
-    legend=False,
-    palette={1: violin_fill_color, 2: "#FFFFFF"},
-    edgecolor=None,
-    bw_adjust=bw_adjust,
-    density_norm=density_norm,
-)
 # Add other models
 for model in alternative_models_list:
     sns.violinplot(
@@ -138,6 +122,21 @@ for model in alternative_models_list:
         legend=False,
         density_norm=density_norm,
     )
+# Add fill for GLEAM4
+sns.violinplot(
+    data=df_metrics[df_metrics["model"] == "GLEAM4"][["KGE"]],
+    y="KGE",
+    hue=1,
+    hue_order=[1, 2],
+    ax=ax,
+    dodge=True,
+    split=split,
+    inner=None,
+    legend=False,
+    palette={1: violin_fill_color, 2: "#FFFFFF"},
+    bw_adjust=bw_adjust,
+    density_norm=density_norm,
+)
 ax.axhline(-0.41, color="red")
 ax.set_ylim(-1, 1.1)
 plt.tight_layout()
