@@ -9,6 +9,8 @@ import xarray as xr
 from conf import color_dict, folder_figures, folder_insitu, violin_fill_color
 from functions import kge_agg_func, txt_to_netcdf
 
+folder_figures.mkdir(exist_ok=True)
+
 # %% Read in data
 ds_validation_path = folder_insitu / "sites_validation.nc"
 if not ds_validation_path.exists():

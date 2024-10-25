@@ -4,7 +4,6 @@ from pathlib import Path
 # %% Paths
 folder_insitu = Path("data/sites")
 folder_figures = Path("figures")
-folder_figures.mkdir(exist_ok=True)
 
 # %% Colors
 color_dict = {
