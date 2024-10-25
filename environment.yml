@@ -7,3 +7,4 @@ dependencies:
   - xarray
   - seaborn=0.13.*
   - ipykernel
+  - cftime
