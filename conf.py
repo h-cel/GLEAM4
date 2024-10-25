@@ -13,3 +13,6 @@ color_dict = {
     "FLUXCOM": "#4a8740",
 }
 violin_fill_color = "#484948"
+
+# %% Sites
+site_selection = ["PE-QFR", "DE-Tha", "US-Ne1", "AU-How"]
