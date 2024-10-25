@@ -4,25 +4,18 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import xarray as xr
 
-from functions import extract_site_code, kge_agg_func
-
-# %% Set paths
-folder_insitu = Path("data/sites")
-figures_folder = Path("figures")
-figures_folder.mkdir(exist_ok=True)
+from conf import color_dict, folder_figures, folder_insitu, violin_fill_color
+from functions import kge_agg_func, txt_to_netcdf
 
 # %% Read in data
-pd_list = []
-for site_file in folder_insitu.iterdir():
-    site_name = extract_site_code(site_file.name)
-    df_in_situ = pd.read_csv(site_file, index_col=0)
-    df_in_situ["site"] = site_name
-    df_in_situ = df_in_situ.reset_index().set_index(["time", "site"])
-    pd_list.append(df_in_situ)
-ds_validation = pd.concat(pd_list).to_xarray()
-# Rename for consistency
-ds_validation = ds_validation.rename({"GLEAM38": "GLEAM v3.8", "ERA5": "ERA5-Land"})
+ds_validation_path = folder_insitu / "sites_validation.nc"
+if not ds_validation_path.exists():
+    ds_validation = txt_to_netcdf(folder_insitu)
+    ds_validation.to_netcdf(ds_validation_path)
+else:
+    ds_validation = xr.open_dataset(ds_validation_path)
 
 # %% Calculate KGE
 metric_list = []
@@ -52,7 +45,13 @@ for model in alternative_models_list:
     plot_list.append(pd.concat([df_temp, df_temp2]))
 df_plot = pd.concat(plot_list).reset_index()
 
-# %% Violinplot for KGE
+# %% General violinplot settings
+split = True
+inner = "quart"
+bw_adjust = 0.6
+density_norm = "count"
+
+# %% Violinplot for KGE (Three seperate)
 fig, ax = plt.subplots(figsize=(8, 5))
 sns.violinplot(
     data=df_plot,
@@ -60,18 +59,18 @@ sns.violinplot(
     y="KGE",
     hue="model type",
     ax=ax,
-    split=True,
+    split=split,
     palette="Set2",
-    inner="quart",
-    bw_adjust=0.6,
+    inner=inner,
+    bw_adjust=bw_adjust,
+    density_norm=density_norm,
 )
 ax.axhline(-0.41, color="red")
 ax.legend()
 ax.set_xlabel("Alternative model")
 ax.set_ylim(-1)
-fig.savefig("figures/GLEAM4_violinplots.pdf")
 
-# %% Exclude outliers for KDE estimate
+# %% Additional visualisation: Exclude outliers for KDE estimate
 Q1 = df_plot["KGE"].quantile(0.25)
 Q3 = df_plot["KGE"].quantile(0.75)
 IQR = Q3 - Q1
@@ -99,34 +98,47 @@ ax.axhline(-0.41, color="red")
 ax.legend()
 ax.set_xlabel("Alternative model")
 
-# %% Boxplot for KGE
-fig, ax = plt.subplots()
-sns.boxplot(
-    data=df_plot,
-    x="model",
+# %% Final figure: Violinplot for KGE, one with all models combined
+fig, ax = plt.subplots(figsize=(4.5, 5))
+# Add fill for GLEAM4
+sns.violinplot(
+    data=df_metrics[df_metrics["model"] == "GLEAM4"][["KGE"]],
     y="KGE",
-    hue="model type",
-    palette="Set2",
-    showfliers=False,
-    notch=True,
+    hue=1,
+    hue_order=[1, 2],
     ax=ax,
-)
-sns.stripplot(
-    data=df_plot,
-    x="model",
-    y="KGE",
-    hue="model type",
     dodge=True,
-    jitter=True,
-    palette="dark:black",
-    size=2,
-    ax=ax,
-    alpha=0.5,
+    split=split,
+    inner=None,
     legend=False,
+    palette={1: violin_fill_color, 2: "#FFFFFF"},
+    edgecolor=None,
+    bw_adjust=bw_adjust,
+    density_norm=density_norm,
 )
+# Add other models
+for model in alternative_models_list:
+    sns.violinplot(
+        data=df_plot[df_plot["model"] == model].sort_values(
+            "model type", ascending=False
+        ),
+        y="KGE",
+        hue="model type",
+        ax=ax,
+        split=split,
+        palette={
+            "Alternative model": color_dict[model],
+            "GLEAM4": color_dict["GLEAM4"],
+        },
+        inner=inner,
+        fill=False,
+        bw_adjust=bw_adjust,
+        legend=False,
+        density_norm=density_norm,
+    )
 ax.axhline(-0.41, color="red")
-ax.set_xlabel("Alternative model")
-ax.legend()
-ax.set_ylim(-1)
+ax.set_ylim(-1, 1.1)
+plt.tight_layout()
+fig.savefig(folder_figures / "GLEAM4_violinplot.pdf")
 
 # %%

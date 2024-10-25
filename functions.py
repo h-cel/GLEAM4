@@ -108,3 +108,32 @@ def kge_agg_func(x, name_true, name_pred, modified=False):
         result["alpha"] = gamma_or_alpha
 
     return pd.Series(result)
+
+
+def txt_to_netcdf(insitu_folder):
+    """
+    Aggregates the seperate .txt files per site in one netcdf file
+
+    Parameters
+    ----------
+    insitu_folder: pathlib.Path
+        Folder containing all txt files
+
+    Returns
+    -------
+    ds_validation: xarray.Dataset
+        Xarray dataset with all validation data
+
+    """
+    pd_list = []
+    txt_files = [file for file in insitu_folder.iterdir() if file.name.endswith(".txt")]
+    for site_file in txt_files:
+        site_name = extract_site_code(site_file.name)
+        df_in_situ = pd.read_csv(site_file, index_col=0, parse_dates=True)
+        df_in_situ["site"] = site_name
+        df_in_situ = df_in_situ.reset_index().set_index(["time", "site"])
+        pd_list.append(df_in_situ)
+    ds_validation = pd.concat(pd_list).to_xarray()
+    # Rename for consistency
+    ds_validation = ds_validation.rename({"GLEAM38": "GLEAM v3.8", "ERA5": "ERA5-Land"})
+    return ds_validation
