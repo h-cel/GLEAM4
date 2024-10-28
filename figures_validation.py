@@ -51,7 +51,7 @@ df_plot = pd.concat(plot_list).reset_index()
 split = True
 inner = "quart"
 bw_adjust = 0.6
-density_norm = "count"
+density_norm = "area"
 
 # %% Violinplot for KGE (Three seperate)
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -121,6 +121,7 @@ for model in alternative_models_list:
         bw_adjust=bw_adjust,
         legend=False,
         density_norm=density_norm,
+        common_norm=True,
     )
 # Add fill for GLEAM4
 sns.violinplot(
