@@ -7,7 +7,7 @@ import seaborn as sns
 import xarray as xr
 
 from conf import color_dict, folder_figures, folder_insitu, violin_fill_color
-from functions import kge_agg_func, txt_to_netcdf
+from functions import kge_agg_func, plot_taylor, txt_to_netcdf
 
 folder_figures.mkdir(exist_ok=True)
 
@@ -142,5 +142,8 @@ ax.axhline(-0.41, color="red")
 ax.set_ylim(-1, 1.1)
 plt.tight_layout()
 fig.savefig(folder_figures / "GLEAM4_violinplot.pdf")
+
+# %% Final figure: Taylor plot
+plot_taylor(folder_insitu, folder_figures)
 
 # %%

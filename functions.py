@@ -1,7 +1,14 @@
+import os
 import re
 
+import matplotlib.pylab as plt
+import mpl_toolkits.axisartist.floating_axes as fa
+import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
+from matplotlib.colors import ListedColormap
+from matplotlib.projections import PolarAxes
+from scipy.stats import gaussian_kde
 
 
 def extract_site_code(filename):
@@ -33,6 +40,214 @@ def extract_site_code(filename):
     else:
         site = None
     return site
+
+
+def fun_taylor(
+    path_in,
+    fig,
+    rect,
+    font_lbl,
+    font_tick,
+    global_min,
+    global_max,
+    dataset_name,
+    dataset_index,
+):
+    """
+    Function to create taylor plots
+
+    Parameters
+    ----------
+    path_in: string
+        Path pointing to the folder containing all .txt files per site
+    fig: matplotlib.pyplot.figure
+        Figure object
+    rect: int
+        3 number integer consisting, where last number is 0. First two
+        indicate numbers of rows and cols (typically 1 and 1)
+    font_lbl: int
+        Size of font for label
+    font_tic: int
+        Size of the the font for the ticks
+    global_min: float(like)
+        Global minimum density over all datasets
+    global_max: float(like)
+        Global maximum density over all datasets
+    dataset_name: string
+        One of the following: "GLEAM4", "GLEAM38", "ERA5", "FLUXCOM"
+    dataset_index: int
+        Integer corresponding with the index of the dataset_name in the
+        list given abov
+
+    Returns
+    -------
+    fig: matplotlib.pyplot.figure
+        Figure object
+    """
+
+    # list all cleaned pdframes of in situ data
+    fn = [file for file in os.listdir(path_in) if file.endswith(".txt")]
+
+    # colors = ['summer_r', 'pink_r', 'bone_r', 'gist_heat_r']
+    colors = ["viridis", "viridis", "viridis", "viridis"]
+
+    sample_points = []
+    for s in range(0, len(fn)):
+        # load pdframe with data
+        pdframe_all = pd.read_csv(os.path.join(path_in, fn[s])).set_index("time")
+
+        # remove nan values in pdframe
+
+        pdframe_subset = pdframe_all[["insitu", "GLEAM4", "GLEAM38", "ERA5", "FLUXCOM"]]
+        pdframe = pdframe_subset[~pdframe_subset.isna().any(axis=1)]
+
+        if len(pdframe) > 1:
+
+            # calculate statistics
+            cor_pearson = pdframe.corr(method="pearson")["insitu"][dataset_name]
+
+            std_mod = pdframe[dataset_name].std(ddof=1)
+            std_obs = pdframe["insitu"].std(ddof=1)
+
+            sdev_mod = std_mod / std_obs
+            sdev_obs = std_obs / std_obs
+            ccoef = cor_pearson
+
+            # remove nan
+            # sdev_mod     = sdev_mod[np.isnan(sdev_mod)==0]
+            # sdev_obs     = sdev_obs[np.isnan(sdev_obs)==0]
+            # ccoef        = ccoef[np.isnan(ccoef)==0]
+
+            # Combine sample points
+            stddev = sdev_mod
+            corrcoef = ccoef
+
+            sample_points.append((stddev, corrcoef))
+
+    stdmax = 2.5
+
+    # rect
+    rows = int(str(rect)[0])
+    cols = int(str(rect)[1])
+    idx = int(str(rect)[2:])
+    grid = plt.GridSpec(rows, cols, wspace=0.25, hspace=0.25)
+    rect = grid[idx]
+
+    # Reference std
+    stdref = np.nanmean(sdev_obs)
+
+    dia = TaylorDiagramdensity(
+        sample_points,
+        stdref,
+        stdmax,
+        font_lbl,
+        font_tick,
+        fig=fig,
+        rect=rect,
+        extend=False,
+    )
+
+    dia.samplePoints[0].set_color("r")  # Mark reference point as a red star
+
+    # add model median
+    # dia.add_sample(np.nanmedian(sdev_mod), np.nanmedian(ccoef),marker='*', ms=15, ls='', mfc='k', mew=0,zorder=5)
+
+    # Add RMS contours, and label them
+    contours = dia.add_contours(levels=5, lw=0.5, colors="0.5")  # 5 levels in grey
+    plt.clabel(contours, inline=1, fontsize=font_tick, fmt="%.1f")
+
+    dia.add_grid()  # Add grid
+    dia._ax.axis[:].major_ticks.set_tick_out(True)  # Put ticks outward
+
+    levels = 10
+    # plot density
+    dia.add_density(
+        stdmax,
+        sample_points,
+        global_min,
+        global_max,
+        font_tick,
+        levels_number=levels,
+        color=colors[dataset_index],
+    )
+
+    del stdmax, sample_points
+    return fig
+
+
+def fun_taylor_prepare(path_in):
+    """
+    Calculate global_min and global_max density value for all the datasets that is
+    later used as a fixed level in the density plot
+
+    Parameters
+    ---------
+    path_in: string
+        Path pointing to the folder containing all .txt files per site
+
+    Returns
+    -------
+    global_min: floatlike
+        Global minimum density over all datasets
+    global_max: floatlike
+        Global maximum density over all datasets
+
+    """
+
+    # list all cleaned pdframes of in situ data
+    fn = [file for file in os.listdir(path_in) if file.endswith(".txt")]
+    # list datasets
+    datasets = ["GLEAM4", "GLEAM38", "ERA5", "FLUXCOM"]
+
+    all_dataset_sample_points = []
+    # sample_points = []
+    for i, v in enumerate(datasets):
+        sample_points = []
+        for s in range(0, len(fn)):
+            # load pdframe with data
+            pdframe_all = pd.read_csv(os.path.join(path_in, fn[s])).set_index("time")
+
+            # remove nan values in pdframe
+            pdframe_subset = pdframe_all[
+                ["insitu", "GLEAM4", "GLEAM38", "ERA5", "FLUXCOM"]
+            ]
+            pdframe = pdframe_subset[~pdframe_subset.isna().any(axis=1)]
+
+            if len(pdframe) > 1:
+
+                # calculate statistics
+                cor_pearson = pdframe.corr(method="pearson")["insitu"][v]
+
+                std_mod = pdframe[v].std(ddof=1)
+                std_obs = pdframe["insitu"].std(ddof=1)
+
+                sdev_mod = std_mod / std_obs
+                ccoef = cor_pearson
+
+                # Combine sample points
+                stddev = sdev_mod
+                corrcoef = ccoef
+
+                sample_points.append((stddev, corrcoef))
+
+        all_dataset_sample_points.append(sample_points)
+
+    # Calculate Z values for all sample points
+    all_Z_values = []
+    for sample_point in all_dataset_sample_points:
+        r = [std for std, corr in sample_point]
+        theta = [np.arccos(corr) for std, corr in sample_point]
+        kde = gaussian_kde(np.vstack([r, theta]))
+        r_grid = np.linspace(0, 2, 100)
+        theta_grid = np.linspace(0, np.pi, 100)
+        R, Theta = np.meshgrid(r_grid, theta_grid)
+        Z = kde(np.vstack([R.flatten(), Theta.flatten()])).reshape(R.shape)
+        all_Z_values.append(Z)
+
+    global_min = np.min([Z.min() for Z in all_Z_values])
+    global_max = np.max([Z.max() for Z in all_Z_values])
+
+    return global_min, global_max
 
 
 def kge(y_true, y_pred, modified=False):
@@ -108,6 +323,272 @@ def kge_agg_func(x, name_true, name_pred, modified=False):
         result["alpha"] = gamma_or_alpha
 
     return pd.Series(result)
+
+
+class TaylorDiagramdensity(object):
+    """
+    Taylor diagram (Taylor, 2001) implementation..
+
+    Plot model standard deviation and correlation to reference (data)
+    sample in a single-quadrant polar plot, with r=stddev and
+    theta=arccos(correlation).
+
+    This is based on the code of Yannick Copin, created on 2018-12-06
+    """
+
+    def __init__(
+        self,
+        sample_points,
+        refstd,
+        stdmax,
+        font_lbl,
+        font_tick,
+        fig=None,
+        rect=111,
+        label="_",
+        extend=False,
+    ):
+        """
+        Set up Taylor diagram axes, i.e. single quadrant polar
+        plot, using `mpl_toolkits.axisartist.floating_axes`.
+
+        Parameters
+        -----------
+
+        * refstd: reference standard deviation to be compared to
+        * fig: input Figure or None
+        * rect: subplot definition
+        * label: reference label
+        * srange: stddev axis extension, in units of *refstd*
+        * extend: extend diagram to negative correlations
+        """
+
+        self.refstd = refstd  # Reference standard deviation
+        srange = (0, stdmax)
+
+        tr = PolarAxes.PolarTransform()
+
+        # Correlation labels
+        rlocs = np.array([0, 0.2, 0.4, 0.6, 0.7, 0.8, 0.9, 0.98, 1])
+
+        if extend:
+            # Diagram extended to negative correlations
+            self.tmax = np.pi
+            rlocs = np.concatenate((-rlocs[:0:-1], rlocs))
+        else:
+            # Diagram limited to positive correlations
+            self.tmax = np.pi / 2
+        tlocs = np.arccos(rlocs)  # Conversion to polar angles
+        gl1 = gf.FixedLocator(tlocs)  # Positions
+        tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+        # Standard deviation axis extent (in units of reference stddev)
+        self.smin = srange[0] * self.refstd
+        self.smax = srange[1] * self.refstd
+
+        ghelper = fa.GridHelperCurveLinear(
+            tr,
+            extremes=(0, self.tmax, self.smin, self.smax),
+            grid_locator1=gl1,
+            tick_formatter1=tf1,
+        )
+
+        if fig is None:
+            fig = plt.figure()
+
+        ax = fa.FloatingSubplot(fig, rect, grid_helper=ghelper)
+        fig.add_subplot(ax)
+        self.fig = fig
+
+        # Adjust axes
+        ax.axis["top"].set_axis_direction("bottom")  # "Angle axis"
+        ax.axis["top"].toggle(ticklabels=True, label=True)
+        ax.axis["top"].major_ticklabels.set_axis_direction("top")
+        ax.axis["top"].label.set_axis_direction("top")
+        ax.axis["top"].label.set_text("Correlation")
+        ax.axis["top"].label.set_fontsize(font_lbl)
+        ax.axis["top"].major_ticklabels.set_fontsize(font_tick)
+
+        ax.axis["left"].set_axis_direction("bottom")  # "X axis"
+        ax.axis["left"].major_ticklabels.set_axis_direction("right")
+        ax.axis["left"].label.set_text("Standard deviation")
+        ax.axis["left"].label.set_fontsize(font_lbl)
+        ax.axis["left"].major_ticklabels.set_fontsize(font_tick)
+
+        ax.axis["right"].set_axis_direction("top")  # "Y-axis"
+        ax.axis["right"].toggle(ticklabels=True)
+        ax.axis["right"].major_ticklabels.set_axis_direction(
+            "bottom" if extend else "left"
+        )
+        ax.axis["right"].label.set_fontsize(font_lbl)
+        ax.axis["right"].major_ticklabels.set_fontsize(font_tick)
+
+        if self.smin:
+            ax.axis["bottom"].toggle(ticklabels=False, label=False)
+        else:
+            ax.axis["bottom"].set_visible(False)  # Unused
+
+        self._ax = ax  # Graphical axes
+        self.ax = ax.get_aux_axes(tr)  # Polar coordinates
+
+        # Add reference point and stddev contour
+        (l,) = self.ax.plot(
+            [0.007],
+            self.refstd,
+            "k*",
+            ls="",
+            ms=14,
+            label=label,
+            mec="black",
+            mfc="red",
+            markeredgewidth=0,
+        )
+        t = np.linspace(0, self.tmax)
+        r = np.zeros_like(t) + self.refstd
+        self.ax.tick_params(axis="both", which="major", pad=15)
+        self.ax.plot(t, r, "k--", label="_")
+
+        # Collect sample points for latter use (e.g. legend)
+        self.samplePoints = [l]
+
+    def add_sample(self, stddev, corrcoef, *args, **kwargs):
+        """
+        Add sample (*stddev*, *corrcoeff*) to the Taylor
+        diagram. *args* and *kwargs* are directly propagated to the
+        `Figure.plot` command.
+        """
+
+        (l,) = self.ax.plot(
+            np.arccos(corrcoef), stddev, *args, **kwargs
+        )  # (theta, radius)
+        self.samplePoints.append(l)
+
+        return l
+
+    def add_grid(self, *args, **kwargs):
+        """Add a grid."""
+
+        self._ax.grid(*args, **kwargs)
+
+    def add_contours(self, levels, lw, **kwargs):
+        """
+        Add constant centered RMS difference contours, defined by *levels*.
+        """
+
+        rs, ts = np.meshgrid(
+            np.linspace(self.smin, self.smax), np.linspace(0, self.tmax)
+        )
+
+        # Compute centered RMS difference
+        rms = np.sqrt(self.refstd**2 + rs**2 - 2 * self.refstd * rs * np.cos(ts))
+
+        contours = self.ax.contour(ts, rs, rms, levels, **kwargs)
+        plt.setp(contours.collections, linewidth=lw)
+
+        return contours
+
+    def add_density(
+        self,
+        stdmax,
+        sample_points,
+        global_min,
+        global_max,
+        font_tick,
+        levels_number,
+        color,
+        *args,
+        **kwargs
+    ):
+        """
+        Add density plots of points instead of individual points
+        """
+
+        # Convert the points to polar coordinates
+        r = [std for std, corr in sample_points]
+        theta = [np.arccos(corr) for std, corr in sample_points]
+
+        # Generate density data for the contour plot
+        kde = gaussian_kde(np.vstack([r, theta]))
+        r_grid = np.linspace(0, 2, 100)
+        theta_grid = np.linspace(0, np.pi, 100)
+        R, Theta = np.meshgrid(r_grid, theta_grid)
+        Z = kde(np.vstack([R.flatten(), Theta.flatten()])).reshape(R.shape)
+
+        levels = np.linspace(global_min, global_max, levels_number)
+        cmap = plt.colormaps[color]
+        cmap_colors = cmap(np.linspace(0, 1, cmap.N))
+        alpha_levels = np.linspace(0, 1, len(levels))
+        for i in range(len(levels)):
+            if i == 0:
+                alpha_levels[i] = 0  # Make the first level fully transparent
+            elif i == 1:
+                alpha_levels[i] = 0  # Partially transparent for the second level
+            else:
+                alpha_levels[i] = 1  # Opaque for the rest
+
+        cmap_colors[:, -1] = np.interp(
+            np.linspace(0, 1, cmap.N), np.linspace(0, 1, len(levels)), alpha_levels
+        )
+        transparent_cmap = ListedColormap(cmap_colors)
+
+        contour = self.ax.contourf(
+            Theta, R, Z, levels=levels, cmap=transparent_cmap, *args, **kwargs
+        )
+
+        cax = self.fig.add_axes([0.85, 0.12, 0.05, 0.7])
+
+        cbar = self.fig.colorbar(contour, cax=cax)
+        cbar.ax.tick_params(labelsize=20)
+
+
+def plot_taylor(path_in, path_out, format=".pdf"):
+    """
+    Create taylor plots for the 4 different datasets
+
+    Parameters
+    ----------
+    path_in: string
+        Path pointing to the folder containing all .txt files per site
+    path_out: string
+        Path pointing to the folder which will contain the saved figures
+    format: string
+        format to save the figures in, default to ".pdf"
+
+    """
+
+    ymin = -0.25
+    ymax = 1.1
+    font_lbl = 20
+    font_tick = 18
+
+    # list datasets
+    datasets = ["GLEAM4", "GLEAM38", "ERA5", "FLUXCOM"]
+    title_name = ["GLEAM4", "GLEAMv3.8", "ERA5Land", "FLUXCOM"]
+
+    global_min, global_max = fun_taylor_prepare(path_in)
+
+    for i, v in enumerate(datasets):
+        # combination 1
+        fig = plt.figure(figsize=(13, 10))
+        # plt.subplots_adjust(left=0.15, bottom=0.15, right=0.85, top=0.85, wspace=0.1, hspace=0.5)
+
+        # Taylor diagram GLEAM4
+        fun_taylor(
+            path_in,
+            fig,
+            110,
+            font_lbl,
+            font_tick,
+            global_min,
+            global_max,
+            dataset_name=v,
+            dataset_index=i,
+        )
+        fig.suptitle(v, fontsize=35)
+        plt.show()
+        fig.savefig(os.path.join(path_out, "fig_Taylordensity_" + v + format))
+
+        plt.close()
 
 
 def txt_to_netcdf(insitu_folder):
