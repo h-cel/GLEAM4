@@ -15,4 +15,9 @@ color_dict = {
 violin_fill_color = "#484948"
 
 # %% Sites
-site_selection = ["PE-QFR", "DE-Tha", "US-Ne1", "AU-How"]
+site_selection = {
+    "PE-QFR": "2019",
+    "DE-Tha": "2003",
+    "US-Ne3": "2012",
+    "AU-How": "2010",
+}
