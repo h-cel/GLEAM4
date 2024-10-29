@@ -58,33 +58,6 @@ ds_doy = ds_validation.groupby("time.dayofyear")
 ds_climatology = ds_doy.mean("time")
 ds_anomalies = ds_doy - ds_climatology["insitu"]
 
-# %% Multi year anomalies
-fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 8))
-for i, site in enumerate(site_selection):
-    for model, color in color_dict.items():
-        ds_anomalies.sel(site=site)[model].plot(
-            ax=axes[i],
-            label=model,
-            linewidth=0.8,
-            color=color,
-        )
-    # Add in situ data
-    da_anom_inistu = ds_anomalies.sel(site=site)["insitu"].dropna(dim="time")
-    axes[i].fill_between(
-        x=da_anom_inistu.time,
-        y1=0,
-        y2=da_anom_inistu,
-        color="lightgrey",
-        label="In situ",
-    )
-    axes[i].set_xlabel("")
-    axes[i].set_ylabel(r"$E$ anomalies [mm/day]")
-    axes[i].set_xlim([da_anom_inistu.time[0], da_anom_inistu.time[-1]])
-handles, labels = axes[0].get_legend_handles_labels()
-fig.legend(handles, labels, loc="upper center", ncol=len(var_selection))
-plt.tight_layout()
-plt.subplots_adjust(top=0.9)
-
 # %% 1 Year anomalies
 fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 8))
 for i, site in enumerate(site_selection):
