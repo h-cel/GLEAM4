@@ -13,6 +13,7 @@ color_dict = {
     "FLUXCOM": "#4a8740",
 }
 violin_fill_color = "#484948"
+insitu_fill_color = "darkgray"
 
 # %% Sites
 site_selection = {
