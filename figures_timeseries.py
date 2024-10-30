@@ -111,26 +111,4 @@ plt.tight_layout()
 plt.subplots_adjust(top=0.9)
 fig.savefig(folder_figures / "GLEAM4_timeseries_anomalies_sites_1year.pdf")
 
-
-# %% Model deviation from reality
-ds_dev = ds_validation - ds_validation["insitu"]
-fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 8))
-for i, site in enumerate(site_selection):
-    year = "2005"
-    if site == "PE-QFR":
-        year = "2019"
-    for model, color in color_dict.items():
-        ds_dev.sel(site=site, time=year)[model].plot(
-            ax=axes[i],
-            label=model,
-            linewidth=0.8,
-            color=color,
-        )
-    axes[i].set_xlabel("")
-    axes[i].set_ylabel(r"$E$ model - in situ [mm/day]")
-handles, labels = axes[0].get_legend_handles_labels()
-fig.legend(handles, labels, loc="upper center", ncol=len(var_selection))
-plt.tight_layout()
-plt.subplots_adjust(top=0.9)
-
 # %%
