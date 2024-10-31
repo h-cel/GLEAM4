@@ -29,21 +29,29 @@ else:
 var_selection = list(color_dict.keys())
 var_selection.append("insitu")
 ds_validation = ds_validation.sel(site=list(site_selection.keys()))[var_selection]
+# QUESTION: should climatology be on the same years? not over all years with data
+# Probably yes -> to be fixed later
 
 # %% Calculating anomalies
 window_length = 31  # days (should be uneven)
 padding_length = int(window_length / 2 - 1)
 ds_doy = ds_validation.groupby("time.dayofyear")
 ds_climatology = ds_doy.mean("time", skipna=True)
-da_clim_inistu = ds_climatology["insitu"]
-da_clim_padded = xr.concat(
-    [da_clim_inistu[-padding_length:], da_clim_inistu, da_clim_inistu[:padding_length]],
+len_doy = len(ds_climatology.dayofyear)
+ds_clim_padded = xr.concat(
+    [
+        ds_climatology.sel(dayofyear=slice(len_doy - padding_length, len_doy)),
+        ds_climatology,
+        ds_climatology.sel(dayofyear=slice(1, padding_length + 1)),
+    ],
     dim="dayofyear",
 )
-da_clim_mwa = da_clim_padded.rolling(dayofyear=window_length, center=True).mean(
-    skipna=True
-)[padding_length:-padding_length]
-ds_anomalies = ds_doy - da_clim_mwa
+ds_clim_mwa = (
+    ds_clim_padded.rolling(dayofyear=window_length, center=True)
+    .mean(skipna=True)
+    .isel(dayofyear=slice(padding_length + 1, len_doy + padding_length + 1))
+)
+ds_anomalies = ds_doy - ds_clim_mwa
 
 # %% Single year plot
 fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 8))
@@ -75,8 +83,9 @@ plt.subplots_adjust(top=0.9)
 fig.savefig(folder_figures / "GLEAM4_timeseries_sites_1year.pdf")
 
 # %% 1 Year anomalies
-fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 8))
+fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 10.5))
 for i, site in enumerate(site_selection.keys()):
+    axins = axes[i].inset_axes(bounds=[0.72, 0.25, 0.25, 0.65])
     for model, color in color_dict.items():
         if model == "GLEAM4":
             zorder = 3
@@ -85,6 +94,7 @@ for i, site in enumerate(site_selection.keys()):
         ds_anomalies.sel(site=site, time=site_selection[site])[model].plot(
             ax=axes[i], label=model, linewidth=0.8, color=color, zorder=zorder
         )
+        ds_clim_mwa.sel(site=site)[model].plot(ax=axins, color=color, zorder=zorder)
     # Add in situ data
     da_anom_inistu = ds_anomalies.sel(site=site, time=site_selection[site])["insitu"]
     axes[i].fill_between(
@@ -94,13 +104,19 @@ for i, site in enumerate(site_selection.keys()):
         color=insitu_fill_color,  # "silver",
         label="In situ",
     )
+    axins.fill_between(
+        x=ds_clim_mwa.dayofyear,
+        y1=0,
+        y2=ds_clim_mwa.sel(site=site)["insitu"],
+        color=insitu_fill_color,
+    )
+    # ds_clim_mwa.sel(site=site)["insitu"].plot(ax=axins, color=insitu_fill_color)
     axes[i].set_xlabel("")
     axes[i].set_ylabel(r"$E$ anomalies [mm/day]")
     xlims = axes[i].get_xlim()
     axes[i].set_xlim(xlims[0], xlims[1] + 0.5 * (xlims[1] - xlims[0]))
     axes[i].set_title(site)
-    axins = axes[i].inset_axes(bounds=[0.72, 0.25, 0.25, 0.65])
-    da_clim_mwa.sel(site=site).plot(ax=axins, color=insitu_fill_color)  # "silver")
+
     axins.set_title("")
     axins.set_xlabel("DOY")
     axins.set_ylabel(r"$E_{\text{clim}}$ [mm/day]")
