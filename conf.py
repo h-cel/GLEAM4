@@ -20,4 +20,5 @@ site_selection = {
     "DE-Tha": "2003",
     "US-Ne3": "2012",
     "AU-How": "2010",
+    "FR-Pue": "2016",
 }
