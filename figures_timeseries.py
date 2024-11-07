@@ -29,29 +29,56 @@ else:
 var_selection = list(color_dict.keys())
 var_selection.append("insitu")
 ds_validation = ds_validation.sel(site=list(site_selection.keys()))[var_selection]
-# QUESTION: should climatology be on the same years? not over all years with data
-# Probably yes -> to be fixed later
 
 # %% Calculating anomalies
 window_length = 31  # days (should be uneven)
 padding_length = int(window_length / 2 - 1)
-ds_doy = ds_validation.groupby("time.dayofyear")
-ds_climatology = ds_doy.mean("time", skipna=True)
-len_doy = len(ds_climatology.dayofyear)
-ds_clim_padded = xr.concat(
-    [
-        ds_climatology.sel(dayofyear=slice(len_doy - padding_length, len_doy)),
-        ds_climatology,
-        ds_climatology.sel(dayofyear=slice(1, padding_length + 1)),
-    ],
-    dim="dayofyear",
-)
-ds_clim_mwa = (
-    ds_clim_padded.rolling(dayofyear=window_length, center=True)
-    .mean(skipna=True)
-    .isel(dayofyear=slice(padding_length + 1, len_doy + padding_length + 1))
-)
-ds_anomalies = ds_doy - ds_clim_mwa
+ds_clim_mwa_list = []
+ds_anomalies_list = []
+for site in site_selection.keys():
+    # Only select timestamps with in situ data available (for each site separately)
+    # for climatology
+    ds_validation_tmp = ds_validation.sel(site=site).where(
+        ~ds_validation.insitu.sel(site=site).isnull(), drop=True
+    )
+    ds_climatology_tmp = ds_validation_tmp.groupby("time.dayofyear").mean(
+        "time", skipna=True
+    )
+    len_doy = len(ds_climatology_tmp.dayofyear)
+    ds_clim_padded_tmp = xr.concat(
+        [
+            ds_climatology_tmp.sel(dayofyear=slice(len_doy - padding_length, len_doy)),
+            ds_climatology_tmp,
+            ds_climatology_tmp.sel(dayofyear=slice(1, padding_length + 1)),
+        ],
+        dim="dayofyear",
+    )
+    ds_clim_mwa_tmp = (
+        (
+            ds_clim_padded_tmp.rolling(dayofyear=window_length, center=True)
+            .mean(skipna=True)
+            .isel(dayofyear=slice(padding_length + 1, len_doy + padding_length + 1))
+        )
+        .reset_coords("site")
+        .drop_vars("site")
+    )
+    ds_clim_mwa_list.append(ds_clim_mwa_tmp)
+
+    # Select data between start and end date of `ds_validation`
+    # -> no gaps in data (<-> `ds_validation_tmp`)
+    ds_doy_tmp = ds_validation.sel(
+        site=site, time=slice(ds_validation_tmp.time[0], ds_validation_tmp.time[-1])
+    ).groupby("time.dayofyear")
+    ds_anomalies_tmp = (
+        (ds_doy_tmp - ds_clim_mwa_tmp)
+        .reset_coords(["site", "dayofyear"])
+        .drop_vars(["site", "dayofyear"])
+    )
+    ds_anomalies_list.append(ds_anomalies_tmp)
+# Concat all sites back together
+sites_index = pd.Index(site_selection.keys(), name="site")
+ds_clim_mwa = xr.concat(ds_clim_mwa_list, dim=sites_index)
+ds_anomalies = xr.concat(ds_anomalies_list, dim=sites_index)
 
 # %% Single year plot
 fig, axes = plt.subplots(len(site_selection), 1, figsize=(8, 8))
