@@ -7,21 +7,25 @@ The required dependencies to run the python code in this repository is given in 
 conda env create -f environment.yml
 conda activate gleam4_paper
 ```
+
+For running the MATLAB scripts, a MATLAB license is required. 
+
 ## Data
 
-Data with in situ data (from eddy covariance sites) combined with model predictions at these sites can be found on [zenodo](https://doi.org/10.5281/zenodo.14054258). The data is automatically downloaded when running the scripts `figures_timeseries.py` or `figures_validation.py`. If problems were te occur, considering downloading them manually and save as `data/sites`. 
+In situ data (from eddy covariance sites) combined with model data predictions at these sites can be found on [zenodo](https://doi.org/10.5281/zenodo.14054258). The data is automatically downloaded when running the scripts `figures_timeseries.py` or `figures_validation.py`. If problems were te occur, considering downloading them manually and save as `data/sites`. 
 
 ## Scripts
 The main scripts are:
-
+- `figures_global_patterns.m`: Scripts with the plots assessing the global behaviour of the GLEAM4 dataset (Figure 2,3 and 4)
+- `figures_intercomparison.m`: Scripts to generate the comparison between GLEAM4, GLEAM v3.8, ERA5-Land and FLUXcoM (Figure 5)
 - `figures_validation.py`: Script with the plots to generate the comparison to in situ eddy-covariance measurements (Figure 6).
-- `figures_timeseries.py`: Script with the plots to generate the 4 sites (more details below) their timeseries. 
+- `figures_timeseries.py`: Script with the plots to generate the 4 sites (more details below) their timeseries (Figure 7). 
 
 The following are auxiliary scripts:
 - `conf.py`: configuration file 
 - `functions.py`: contains functions used throughout the main scrips
 
-## Selection of years for timeseries
+### Selection of years for timeseries
 
 - US-Ne3: 2012 is chosen because of drought conditions, see [here](https://www.drought.gov/states/nebraska#historical-conditions) and [here](https://www.dallasfed.org/research/economy/~/media/documents/research/swe/2012/swe1204c.pdf)
 - DE-Tha: 2003 is chosen because of exceptionally hot summer, which had a larger influence on ecosystem function (see for example [Ciais et al., 2005](https://doi.org/10.1038/nature03972))
