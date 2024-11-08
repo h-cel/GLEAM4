@@ -1,5 +1,8 @@
 import os
 import re
+import subprocess
+import zipfile
+from pathlib import Path
 
 import matplotlib.pylab as plt
 import mpl_toolkits.axisartist.floating_axes as fa
@@ -497,7 +500,7 @@ class TaylorDiagramdensity(object):
         levels_number,
         color,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """
         Add density plots of points instead of individual points
@@ -618,3 +621,43 @@ def txt_to_netcdf(insitu_folder):
     # Rename for consistency
     ds_validation = ds_validation.rename({"GLEAM38": "GLEAM v3.8", "ERA5": "ERA5-Land"})
     return ds_validation
+
+
+def download_zenodo(zenodo_doi, output_folder):
+    """
+    Download dataset from zenodo, unzip the folder in it and save in
+    desired output_folder. Also checks if data was already downloaded,
+    and if so the operation is not executed
+
+    Parameters
+    ----------
+    zenodo_doi: string
+        DOI to the zenodo dataset in short form (i.e. what follows after doi.org/)
+    output_folder: string
+        Folder where unzipped data should be saved. In this folder, a folder
+        with the name of the zip folder will be created
+    """
+    output_folder = Path(output_folder)
+    if not output_folder.exists():
+        result = subprocess.run(
+            f"zenodo_get -o {output_folder} {zenodo_doi}",
+            shell=True,
+            capture_output=True,
+            text=True,
+        )
+
+        # Print the output and error messages
+        print("stdout:", result.stdout)
+        print("stderr:", result.stderr)
+
+        # Check if the command was successful
+        if result.returncode != 0:
+            raise RuntimeError(f"Command failed with return code {result.returncode}")
+
+        download_file = open(output_folder / "md5sums.txt", "r")
+        download_check = download_file.read()
+        zip_name = download_check.split()[1]
+        zip_root = zip_name.split(".")[0]
+        download_file.close()
+        with zipfile.ZipFile(output_folder / zip_name) as zip_ref:
+            zip_ref.extractall(output_folder / zip_root)
