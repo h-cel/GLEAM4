@@ -1,4 +1,4 @@
-# GLEAM4
+# GLEAM4 [![DOI](https://zenodo.org/badge/872264216.svg)](https://doi.org/10.5281/zenodo.14056593)
 
 Repository for reproducing the figures of the GLEAM4 paper: *GLEAM4: global land evaporation dataset at 0.1° resolution from 1980 to near present (Miralles et al., in review)*
 
