@@ -1,6 +1,9 @@
 # %% Imports
 from pathlib import Path
 
+# %% In situ data doi
+zenodo_doi = "10.5281/zenodo.14054258"
+
 # %% Paths
 folder_insitu = Path("data/sites")
 folder_figures = Path("figures")

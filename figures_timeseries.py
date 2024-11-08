@@ -12,10 +12,14 @@ from conf import (
     folder_insitu,
     insitu_fill_color,
     site_selection,
+    zenodo_doi,
 )
-from functions import txt_to_netcdf
+from functions import download_zenodo, txt_to_netcdf
 
 folder_figures.mkdir(exist_ok=True)
+
+# %% Download data (if necessary)
+download_zenodo(zenodo_doi, "data")
 
 # %% Read in data
 ds_validation_path = folder_insitu / "sites_validation.nc"

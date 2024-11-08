@@ -6,10 +6,19 @@ import pandas as pd
 import seaborn as sns
 import xarray as xr
 
-from conf import color_dict, folder_figures, folder_insitu, violin_fill_color
-from functions import kge_agg_func, plot_taylor, txt_to_netcdf
+from conf import (
+    color_dict,
+    folder_figures,
+    folder_insitu,
+    violin_fill_color,
+    zenodo_doi,
+)
+from functions import download_zenodo, kge_agg_func, plot_taylor, txt_to_netcdf
 
 folder_figures.mkdir(exist_ok=True)
+
+# %% Download data (if necessary)
+download_zenodo(zenodo_doi, "data_test")
 
 # %% Read in data
 ds_validation_path = folder_insitu / "sites_validation.nc"

@@ -1,12 +1,25 @@
 # GLEAM4
 
-Repository for reproducing the figures of the GLEAM4 paper.
+Repository for reproducing the figures of the GLEAM4 paper: *GLEAM4: global land evaporation dataset at 0.1° resolution from 1980 to near present (Miralles et al., in review)*
 
 The required dependencies to run the python code in this repository is given in `environment.yml`. Install via [(Mini)conda](https://docs.anaconda.com/miniconda/) or [Mamba](https://mamba.readthedocs.io/en/latest/) (in this case, replace `conda` by `mamba` in the command below) in the command line interface:
 ```
 conda env create -f environment.yml
 conda activate gleam4_paper
 ```
+## Data
+
+Data with in situ data (from eddy covariance sites) combined with model predictions at these sites can be found on [zenodo](https://doi.org/10.5281/zenodo.14054258). The data is automatically downloaded when running the scripts `figures_timeseries.py` or `figures_validation.py`. If problems were te occur, considering downloading them manually and save as `data/sites`. 
+
+## Scripts
+The main scripts are:
+
+- `figures_validation.py`: Script with the plots to generate the comparison to in situ eddy-covariance measurements (Figure 6).
+- `figures_timeseries.py`: Script with the plots to generate the 4 sites (more details below) their timeseries. 
+
+The following are auxiliary scripts:
+- `conf.py`: configuration file 
+- `functions.py`: contains functions used throughout the main scrips
 
 ## Selection of years for timeseries
 
