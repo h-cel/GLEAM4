@@ -12,7 +12,7 @@ For running the MATLAB scripts, a MATLAB license is required.
 
 ## Data
 
-In situ data (from eddy covariance sites) combined with model data predictions at these sites can be found on [zenodo](https://doi.org/10.5281/zenodo.14054258). The data is automatically downloaded when running the scripts `figures_timeseries.py` or `figures_validation.py`. If problems were te occur, considering downloading them manually and save as `data/sites`. 
+In situ data (from eddy covariance sites) combined with model data predictions at these sites can be found on [zenodo](https://doi.org/10.5281/zenodo.14054257). The data is automatically downloaded when running the scripts `figures_timeseries.py` or `figures_validation.py`. If problems were te occur, considering downloading them manually and save as `data/sites`. 
 
 ## Scripts
 The main scripts are:
