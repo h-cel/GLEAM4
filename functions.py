@@ -609,15 +609,23 @@ def txt_to_netcdf(insitu_folder):
         Xarray dataset with all validation data
 
     """
-    pd_list = []
+    pd_dict = {}
     txt_files = [file for file in insitu_folder.iterdir() if file.name.endswith(".txt")]
     for site_file in txt_files:
         site_name = extract_site_code(site_file.name)
         df_in_situ = pd.read_csv(site_file, index_col=0, parse_dates=True)
         df_in_situ["site"] = site_name
         df_in_situ = df_in_situ.reset_index().set_index(["time", "site"])
-        pd_list.append(df_in_situ)
-    ds_validation = pd.concat(pd_list).to_xarray()
+        # Check if site is already in dict
+        if site_name not in pd_dict.keys():
+            pd_dict[site_name] = df_in_situ
+        else:
+            # Choose the time series for this site with the longest data sequence
+            in_situ_len_new = df_in_situ["insitu"].dropna().shape[0]
+            in_situ_len_old = pd_dict[site_name]["insitu"].dropna().shape[0]
+            if in_situ_len_new > in_situ_len_old:
+                pd_dict[site_name] = df_in_situ
+    ds_validation = pd.concat(list(pd_dict.values())).to_xarray()
     # Rename for consistency
     ds_validation = ds_validation.rename({"GLEAM38": "GLEAM v3.8", "ERA5": "ERA5-Land"})
     return ds_validation
