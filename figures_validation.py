@@ -18,7 +18,7 @@ from functions import download_zenodo, kge_agg_func, plot_taylor, txt_to_netcdf
 folder_figures.mkdir(exist_ok=True)
 
 # %% Download data (if necessary)
-download_zenodo(zenodo_doi, "data_test")
+download_zenodo(zenodo_doi, "data")
 
 # %% Read in data
 ds_validation_path = folder_insitu / "sites_validation.nc"
