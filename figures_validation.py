@@ -13,7 +13,7 @@ from conf import (
     violin_fill_color,
     zenodo_doi,
 )
-from functions import download_zenodo, kge_agg_func, plot_taylor, txt_to_netcdf
+from functions import download_zenodo, metrics_agg_func, plot_taylor, txt_to_netcdf
 
 folder_figures.mkdir(exist_ok=True)
 
@@ -35,13 +35,13 @@ for model in models_list:
     df_val_tmp = (
         ds_validation.to_dataframe()
         .groupby("site")
-        .apply(kge_agg_func, "insitu", model)
+        .apply(metrics_agg_func, "insitu", model)
     )
     df_val_tmp["model"] = model
     df_val_tmp = df_val_tmp.reset_index().set_index(["site", "model"])
     metric_list.append(df_val_tmp)
 df_metrics = pd.concat(metric_list).reset_index().set_index("site")
-
+df_metrics.groupby("model").median()
 # %% Rearange data for plotting
 plot_list = []
 alternative_models_list = models_list.copy()

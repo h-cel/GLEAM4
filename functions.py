@@ -253,9 +253,10 @@ def fun_taylor_prepare(path_in):
     return global_min, global_max
 
 
-def kge(y_true, y_pred, modified=False):
+def metrics(y_true, y_pred, modified=False):
     """
-    Calculate the Kling-Gupta Efficiency (KGE) between two time series.
+    Calculate the Kling-Gupta Efficiency (KGE) and Root Mean Squared Error (RMSE)
+    between two time series.
 
     Parameters
     ----------
@@ -281,6 +282,8 @@ def kge(y_true, y_pred, modified=False):
         Ratio of the standard deviation of the predicted to the standard deviation
         of the true time series (alpha) if modified = False. If modified = True,
         the ratio of the coefficient of variations is used instead (gamma)
+    rmse: float
+        RMSE
     """
     # Select where not Nan
     nan_bool_true = np.isnan(y_true)
@@ -290,6 +293,7 @@ def kge(y_true, y_pred, modified=False):
 
     # calculate
     if y_true.size > 0:
+        # KGE
         r = np.corrcoef(y_true, y_pred)[0, 1]
         mu_true, mu_pred = np.mean(y_true), np.mean(y_pred)
         sigma_true, sigma_pred = np.std(y_true), np.std(y_pred)
@@ -301,14 +305,17 @@ def kge(y_true, y_pred, modified=False):
         kge_acc = 1 - np.sqrt(
             (r - 1) ** 2 + (beta - 1) ** 2 + (gamma_or_alpha - 1) ** 2
         )
+        # RMSE
+        rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
+
     else:
-        kge_acc, r, beta, gamma_or_alpha = None, None, None, None
-    return kge_acc, r, beta, gamma_or_alpha
+        kge_acc, r, beta, gamma_or_alpha, rmse = None, None, None, None, None
+    return kge_acc, r, beta, gamma_or_alpha, rmse
 
 
-def kge_agg_func(x, name_true, name_pred, modified=False):
+def metrics_agg_func(x, name_true, name_pred, modified=False):
     """
-    Wrapper function around `kge` to apply to a pandas DataFrame.
+    Wrapper function around `metrics` to apply to a pandas DataFrame.
     For example usage, see
     https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.apply.html
 
@@ -316,9 +323,9 @@ def kge_agg_func(x, name_true, name_pred, modified=False):
     --------
     kge: the function this one wraps around
     """
-    tuple_out = kge(x[name_true], x[name_pred], modified)
-    kge_acc, r, beta, gamma_or_alpha = tuple_out
-    result = {"KGE": kge_acc, "correlation": r, "beta": beta}
+    tuple_out = metrics(x[name_true], x[name_pred], modified)
+    kge_acc, r, beta, gamma_or_alpha, rmse = tuple_out
+    result = {"KGE": kge_acc, "correlation": r, "beta": beta, "RMSE": rmse}
 
     if modified:
         result["gamma"] = gamma_or_alpha
