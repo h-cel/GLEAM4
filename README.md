@@ -17,9 +17,9 @@ In situ data (from eddy covariance sites) combined with model data predictions a
 ## Scripts
 The main scripts are:
 - `figures_global_patterns.m`: Scripts with the plots assessing the global behaviour of the GLEAM4 dataset (Figure 2,3 and 4)
-- `figures_intercomparison.m`: Scripts to generate the comparison between GLEAM4, GLEAM v3.8, ERA5-Land and FLUXcoM (Figure 5)
-- `figures_validation.py`: Script with the plots to generate the comparison to in situ eddy-covariance measurements (Figure 6).
-- `figures_timeseries.py`: Script with the plots to generate the 4 sites (more details below) their timeseries (Figure 7). 
+- `figures_intercomparison.m`: Scripts to generate the comparison between GLEAM4, GLEAM v3.8, ERA5-Land and FLUXcoM (Figure 5 and 6)
+- `figures_validation.py`: Script with the plots to generate the comparison to in situ eddy-covariance measurements (Figure 7).
+- `figures_timeseries.py`: Script with the plots to generate the 4 sites (more details below) their timeseries (Figure 8). 
 
 The following are auxiliary scripts:
 - `conf.py`: configuration file 
