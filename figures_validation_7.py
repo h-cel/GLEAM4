@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import xarray as xr
-
 from conf import (
     color_dict,
     folder_figures,
@@ -18,7 +17,8 @@ from functions import download_zenodo, metrics_agg_func, plot_taylor, txt_to_net
 folder_figures.mkdir(exist_ok=True)
 
 # %% Download data (if necessary)
-download_zenodo(zenodo_doi, "data")
+# download_zenodo(zenodo_doi, "data")
+# Skip for HPC usage
 
 # %% Read in data
 ds_validation_path = folder_insitu / "sites_validation.nc"

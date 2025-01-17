@@ -5,7 +5,9 @@ from pathlib import Path
 zenodo_doi = "10.5281/zenodo.14054258"
 
 # %% Paths
-folder_insitu = Path("data/sites")
+folder_insitu = Path(
+    "/data/gent/vo/000/gvo00090/GLEAM/data/data/in_situ_data/GLEAM4_validation/cleaned_v42b_retrain_folder"
+)
 folder_figures = Path("figures")
 
 # %% Colors
