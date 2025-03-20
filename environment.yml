@@ -5,6 +5,7 @@ dependencies:
   - python=3.12
   - pandas=2.2.*
   - xarray=2024.09.0
+  - netCDF4
   - seaborn=0.13.*
   - ipykernel
   - cftime
