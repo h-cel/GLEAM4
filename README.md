@@ -14,6 +14,13 @@ For running the MATLAB scripts, a MATLAB license is required.
 
 In situ data (from eddy covariance sites) combined with model data predictions at these sites can be found on [zenodo](https://doi.org/10.5281/zenodo.14054257). The data is automatically downloaded when running the scripts `figures_timeseries.py` or `figures_validation.py`. If problems were te occur, considering downloading them manually and save as `data/sites`. 
 
+For comparison purposes, the following datasets are also used (see [downloading](data_download.py) and [processing](data_processing.py) scripts):
+- GLEAM v3.8
+- ERA5-Land monthly: Downloaded from [Google Earth Engine](https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR#description)
+- FLUXCOM-X X-BASE: Downloaded from ICOS with the script (see [here](external_code/download_xbase_from_icos.py)) as provided in [this gitlab repo](https://gitlab.gwdg.de/fluxcom/fluxcomxdata/-/tree/main). 
+
+NOTE: You need both a GEE and an ICOS account to be able to perform the downloads! 
+
 ## Scripts
 The main scripts are:
 - `figures_global_patterns.m`: Scripts with the plots assessing the global behaviour of the GLEAM4 dataset (Figure 2,3 and 4)

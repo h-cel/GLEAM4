@@ -1,7 +1,9 @@
+import logging
 import os
 import re
 import subprocess
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pylab as plt
@@ -701,3 +703,38 @@ def download_zenodo(zenodo_doi, output_folder):
         download_file.close()
         with zipfile.ZipFile(output_folder / zip_name) as zip_ref:
             zip_ref.extractall(output_folder / zip_root)
+
+
+def data_logging(path):
+    """
+    Set up logging for data downloading/processing scripts.
+
+    Parameters
+    ----------
+    path: pathlib.Path
+        Path to the directory where log files should be saved.
+    """
+    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(message)s",
+        handlers=[
+            logging.FileHandler(path / f"log_{current_datetime}.txt", mode="w"),
+            logging.StreamHandler(),
+        ],
+    )
+    # Get useful information
+    script_path = os.path.abspath(__file__)
+    git_commit = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
+    )
+    git_repo = (
+        subprocess.check_output(["git", "remote", "get-url", "origin"])
+        .strip()
+        .decode("utf-8")
+    )
+    # Log info
+    logging.info(f"Script run at: {current_datetime}")
+    logging.info(f"Script path: {script_path}")
+    logging.info(f"Git commit: {git_commit}")
+    logging.info(f"Git repo: {git_repo}")
