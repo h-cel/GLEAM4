@@ -105,7 +105,6 @@ def fun_taylor(
         pdframe = pdframe_subset[~pdframe_subset.isna().any(axis=1)]
 
         if len(pdframe) > 1:
-
             # calculate statistics
             cor_pearson = pdframe.corr(method="pearson")["insitu"][dataset_name]
 
@@ -217,7 +216,6 @@ def fun_taylor_prepare(path_in):
             pdframe = pdframe_subset[~pdframe_subset.isna().any(axis=1)]
 
             if len(pdframe) > 1:
-
                 # calculate statistics
                 cor_pearson = pdframe.corr(method="pearson")["insitu"][v]
 
@@ -549,6 +547,33 @@ class TaylorDiagramdensity(object):
 
         cbar = self.fig.colorbar(contour, cax=cax)
         cbar.ax.tick_params(labelsize=20)
+
+
+# Function to make custom colormap of Diego
+def make_custom_cmap(vmin, vmax):
+    used_colors = ["Greys", "Greens", "Blues", "Purples"]
+    transitions = [0.125 * vmax, 0.35 * vmax, 0.65 * vmax]
+    # Define the percentages for the colormaps
+    percentages = [
+        (transitions[0] - vmin) / vmax,
+        (transitions[1] - transitions[0]) / vmax,
+        (transitions[2] - transitions[1]) / vmax,
+        (vmax - transitions[2]) / vmax,
+    ]
+    # Calculate the number of colors to take from each colormap
+    num_colors = [
+        int(p * 256) for p in percentages
+    ]  # amount of colors to take from each colorbar
+    colors = []
+    for i, cmap in enumerate(used_colors):
+        cm = plt.get_cmap(cmap)
+        if i != 0:
+            colors.extend(cm(np.linspace(0.25, 1, num=num_colors[i])))
+        else:
+            colors.extend(cm(np.linspace(0.05, 1, num=num_colors[i])))
+        # Start sampling the colormap only from 0.2 to prevent colors being too white
+    new_cmap = ListedColormap(colors, name="Custom_Cmap")
+    return new_cmap
 
 
 def plot_taylor(path_in, path_out, format=".pdf"):
