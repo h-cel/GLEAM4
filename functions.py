@@ -705,7 +705,7 @@ def download_zenodo(zenodo_doi, output_folder):
             zip_ref.extractall(output_folder / zip_root)
 
 
-def data_logging(path):
+def data_logging(path, script_path):
     """
     Set up logging for data downloading/processing scripts.
 
@@ -713,6 +713,8 @@ def data_logging(path):
     ----------
     path: pathlib.Path
         Path to the directory where log files should be saved.
+    script_path: pathlib.Path or str
+        Path to the script that is being logged.
     """
     current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M")
     logging.basicConfig(
@@ -724,7 +726,6 @@ def data_logging(path):
         ],
     )
     # Get useful information
-    script_path = os.path.abspath(__file__)
     git_commit = (
         subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
     )
