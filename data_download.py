@@ -20,9 +20,10 @@ ee.Initialize(
 
 era5_land_path.mkdir(exist_ok=True, parents=True)
 fluxcom_x_base.mkdir(exist_ok=True, parents=True)
+script_path = __file__
 
 # %% Download ERA5_Land total evaporation
-data_logging(era5_land_path)
+data_logging(era5_land_path, script_path)
 logging.info("Downloading monthly (summed) total evaporation data from ERA5-Land")
 logging.info(
     "Data source: https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR#bands"
@@ -31,6 +32,16 @@ logging.info("Script Author: Olivier Bonte")
 
 ds = xr.open_dataset("ee://ECMWF/ERA5_LAND/MONTHLY_AGGR", engine="ee", scale=0.1)
 ds_E = ds["total_evaporation_sum"]
+ds_E.attrs["units"] = "m"
+ds_E.attrs["standard_name"] = "lwe_thickness_of_water_evaporation_amount"
+ds_E.attrs[
+    "description"
+] = """Accumulated amount of water that has evaporated from the Earth's surface, 
+    including a simplified representation of transpiration (from vegetation), into vapor in the air above. 
+    This variable is accumulated from the beginning of the forecast to the end of the forecast step"""
+ds_E = (
+    ds_E * -1
+)  # Convention IFS = negative values if outgoing -> change this to positive
 # Download from 1980 until 2025
 for year in range(1980, 2026):
     logging.info(f"Downloading ERA5-Land total evaporation data for {year}")
@@ -39,7 +50,7 @@ for year in range(1980, 2026):
     )
 
 # %% FLUXCOM X X-BASE download
-data_logging(fluxcom_x_base)
+data_logging(fluxcom_x_base, script_path)
 logging.info("Downloading FLUXCOM-X X-BASE ET data")
 logging.info(
     "Data sources: https://gitlab.gwdg.de/fluxcom/fluxcomxdata/-/blob/main/docs/01-aggregation.md"
