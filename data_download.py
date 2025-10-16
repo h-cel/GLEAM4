@@ -45,7 +45,7 @@ for year in range(1980, 2026):
     ds_E_ = (
         ds_E.sel(time=str(year)) * -1
     )  # Convention IFS = negative values if outgoing -> change this to positive
-    ds_E.sel(time=str(year)).to_netcdf(
+    ds_E_.sel(time=str(year)).to_netcdf(
         era5_land_path / f"ERA5_Land_total_evaporation_monthly_{year}.nc"
     )
 
