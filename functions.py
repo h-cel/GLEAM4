@@ -724,6 +724,7 @@ def data_logging(path, script_path):
             logging.FileHandler(path / f"log_{current_datetime}.txt", mode="w"),
             logging.StreamHandler(),
         ],
+        force=True,
     )
     # Get useful information
     git_commit = (
