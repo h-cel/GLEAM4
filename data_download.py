@@ -39,12 +39,12 @@ ds_E.attrs[
 ] = """Accumulated amount of water that has evaporated from the Earth's surface, 
     including a simplified representation of transpiration (from vegetation), into vapor in the air above. 
     This variable is accumulated from the beginning of the forecast to the end of the forecast step"""
-ds_E = (
-    ds_E * -1
-)  # Convention IFS = negative values if outgoing -> change this to positive
 # Download from 1980 until 2025
 for year in range(1980, 2026):
     logging.info(f"Downloading ERA5-Land total evaporation data for {year}")
+    ds_E_ = (
+        ds_E.sel(time=str(year)) * -1
+    )  # Convention IFS = negative values if outgoing -> change this to positive
     ds_E.sel(time=str(year)).to_netcdf(
         era5_land_path / f"ERA5_Land_total_evaporation_monthly_{year}.nc"
     )
