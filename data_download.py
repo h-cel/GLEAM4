@@ -16,15 +16,13 @@ ee.Initialize(
 )
 
 # Authentication ICOS
-auth.init_config_file()  # Only do this once per computer!
+# auth.init_config_file()  # Only do this once per computer!
 
-era5_land_path.mkdir(exist_ok=True)
-fluxcom_x_base.mkdir(exist_ok=True)
+era5_land_path.mkdir(exist_ok=True, parents=True)
+fluxcom_x_base.mkdir(exist_ok=True, parents=True)
 
 # %% Download ERA5_Land total evaporation
-era5_land_evaporation_path = era5_land_path / "total_evaporation"
-era5_land_evaporation_path.mkdir(exist_ok=True)
-data_logging(era5_land_evaporation_path)
+data_logging(era5_land_path)
 logging.info("Downloading monthly (summed) total evaporation data from ERA5-Land")
 logging.info(
     "Data source: https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR#bands"
@@ -37,21 +35,18 @@ ds_E = ds["total_evaporation_sum"]
 for year in range(1980, 2026):
     logging.info(f"Downloading ERA5-Land total evaporation data for {year}")
     ds_E.sel(time=str(year)).to_netcdf(
-        era5_land_evaporation_path / f"ERA5_Land_total_evaporation_monthly_{year}.nc"
+        era5_land_path / f"ERA5_Land_total_evaporation_monthly_{year}.nc"
     )
 
 # %% FLUXCOM X X-BASE download
-fluxcom_x_base_ET = fluxcom_x_base / "ET"
-fluxcom_x_base_ET.mkdir(exist_ok=True)
-
-data_logging(fluxcom_x_base_ET)
+data_logging(fluxcom_x_base)
 logging.info("Downloading FLUXCOM-X X-BASE ET data")
 logging.info(
     "Data sources: https://gitlab.gwdg.de/fluxcom/fluxcomxdata/-/blob/main/docs/01-aggregation.md"
 )
 logging.info("Script Author: Olivier Bonte")
 subprocess.run(
-    f"python external_code/download_xbase_from_icos.py ET 005_monthly -o {fluxcom_x_base_ET}",
+    f"python external_code/download_xbase_from_icos.py ET 005_monthly -o {fluxcom_x_base}",
     shell=True,
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,

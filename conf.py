@@ -29,8 +29,10 @@ yearly_averages_file = "GLEAM4.2a_yearly_averages.nc"
 gleam_38_path = Path(
     "/data/gent/vo/000/gvo00090/GLEAM/data/data/GLEAM_v3.8/v38a_output/yearly/E"
 )
-era5_land_path = Path("/data/gent/vo/000/gvo00090/EXT/data/ERA5_Land")
-fluxcom_x_base = Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE")
+era5_land_path = (
+    Path("/data/gent/vo/000/gvo00090/EXT/data/ERA5_Land") / "total_evaporation"
+)
+fluxcom_x_base = Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE") / "ET"
 
 # %% Global averaging for global patterns
 REDO = False
