@@ -1038,6 +1038,5 @@ def download_from_icos(flux, resolution, start_year, end_year, saveloc):
     
     
 if __name__ == "__main__":
-    auth.init_config_file()
     args = main()
     download_from_icos(args.flux, args.resolution, args.startyear, args.endyear, args.outdir)
