@@ -6,7 +6,7 @@ import ee
 import xarray as xr
 from icoscp_core import auth
 
-from conf import GEE_PROJECT_ID, era5_land_path, fluxcom_x_base
+from conf import GEE_PROJECT_ID, era5_land_path, fluxcom_x_base_path
 from functions import data_logging
 
 # Authentication GEE
@@ -19,7 +19,7 @@ ee.Initialize(
 # auth.init_config_file()  # Only do this once per computer!
 
 era5_land_path.mkdir(exist_ok=True, parents=True)
-fluxcom_x_base.mkdir(exist_ok=True, parents=True)
+fluxcom_x_base_path.mkdir(exist_ok=True, parents=True)
 script_path = __file__
 
 # %% Download ERA5_Land total evaporation
@@ -50,14 +50,14 @@ for year in range(1980, 2026):
     )
 
 # %% FLUXCOM X X-BASE download
-data_logging(fluxcom_x_base, script_path)
+data_logging(fluxcom_x_base_path, script_path)
 logging.info("Downloading FLUXCOM-X X-BASE ET data")
 logging.info(
     "Data sources: https://gitlab.gwdg.de/fluxcom/fluxcomxdata/-/blob/main/docs/01-aggregation.md"
 )
 logging.info("Script Author: Olivier Bonte")
 subprocess.run(
-    f"python external_code/download_xbase_from_icos.py ET 005_monthly -o {fluxcom_x_base}",
+    f"python external_code/download_xbase_from_icos.py ET 005_monthly -o {fluxcom_x_base_path}",
     shell=True,
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
