@@ -161,4 +161,50 @@ fig.savefig(
 )
 fig
 
+# %% Figure 2 bis: totals and fractions
+da_area = get_area_from_dataset(ds_yearly_mean)
+E_vars = [v for v in ds_yearly_mean.data_vars if v.startswith("E")]
+print(f"E variables: {E_vars}")
+
+ds_summed = (
+    (ds_yearly_mean[E_vars] / 1000) * da_area
+).sum() / 10**9  # (mm -> m) x m^2 -> m^3 -> km^3
+ds_summed.attrs["units"] = "km^3"
+ds_percentages = ds_summed / ds_summed["E"] * 100
+
+## pie plot
+var_percentages = ["Et", "Eb", "Ei", "Eo"]
+
+# percentages
+fig, ax = plt.subplots()
+ax.pie(
+    ds_percentages[var_percentages].to_pandas().values,
+    labels=var_percentages,
+    autopct="%1.1f%%",
+    colors=color_dict_lat.values(),
+)
+ax.set_title(f"{model_version}")
+fig.savefig(folder_figures / f"{model_version}_pie_chart_percentages.png")
+
+
+# absolute values
+def autopct_format(pct, allvals):
+    absolute = int(pct / 100.0 * sum(allvals))
+    return f"{absolute:,} km³/yr"
+
+
+fig, ax = plt.subplots()
+ax.pie(
+    ds_summed[var_percentages].to_pandas().values,
+    labels=var_percentages,
+    autopct=lambda pct: autopct_format(
+        pct, ds_summed[var_percentages].to_pandas().values
+    ),
+    colors=color_dict_lat.values(),
+)
+ax.set_title(
+    f"{model_version}: total E = {round(float(ds_summed['E'].values), 2):,} km³/yr"
+)
+fig.savefig(folder_figures / f"{model_version}_pie_chart_totals.png")
+
 # %%
