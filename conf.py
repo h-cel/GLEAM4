@@ -14,28 +14,33 @@ GEE_PROJECT_ID = "ee-bonteolivier15"  # Replace by your own project ID
 # %% Paths
 folder_insitu = Path("data/sites")
 folder_figures = Path("figures")
+
+# GLEAM 4 Paths
 folder_gridded = Path(
     "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.2a/GLEAM4.2_DA/processed"
     # "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.2b/GLEAM4.2b_DA/processed"
 )
 folder_gridded_monthly = folder_gridded / "monthly"
 folder_gridded_yearly = folder_gridded / "yearly"
-folder_temp_data = Path("data/temp")
 
-seasonal_averages_file = "GLEAM4.2a_seasonal_averages.nc"
-yearly_averages_file = "GLEAM4.2a_yearly_averages.nc"
+# Processed data for plotting
+folder_processed = Path("data/processed")
 
-# For data downloading/processing
+model_version = "GLEAM4.2a"
+seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
+yearly_averages_file = f"{model_version}_yearly_averages.nc"
+yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
+
+# For data downloading of external products
 gleam_38_path = Path(
     "/data/gent/vo/000/gvo00090/GLEAM/data/data/GLEAM_v3.8/v38a_output/yearly/E"
 )
 era5_land_path = (
     Path("/data/gent/vo/000/gvo00090/EXT/data/ERA5_Land") / "total_evaporation"
 )
-fluxcom_x_base = Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE") / "ET"
+fluxcom_x_base_path = Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE") / "ET"
 
 # %% Global averaging for global patterns
-REDO = False
 non_summing_vars = [
     "S",
     "SMs",
