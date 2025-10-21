@@ -3,17 +3,27 @@
 # October 2025
 
 # %% Imports and paths
+import importlib
+
 import matplotlib.pyplot as plt
+import numpy as np
 import xarray as xr
+
+import conf
+import functions
+
+importlib.reload(conf)
+importlib.reload(functions)
 
 from conf import (
     color_dict_lat,
     folder_figures,
     folder_processed,
+    model_version,
     seasonal_averages_file,
     yearly_averages_file,
 )
-from functions import make_custom_cmap
+from functions import get_area_from_dataset, make_custom_cmap
 
 folder_figures.mkdir(exist_ok=True)
 
@@ -21,18 +31,18 @@ folder_figures.mkdir(exist_ok=True)
 ds_yearly_mean = xr.open_dataset(folder_processed / yearly_averages_file)
 ds_seasonal_mean = xr.open_dataset(folder_processed / seasonal_averages_file)
 
-
-# %%  Figure 2: Yearly averages and total
-vmin_E = 0  # mm/year
-vmax_E = 1400  # mm/year
-cmap_E = make_custom_cmap(vmin_E, vmax_E)
-
+# %% Last processing
 # Define "other" as condensation, subliation and open water evaporation
 ds_yearly_mean["Eo"] = (
     ds_yearly_mean["Ec"] + ds_yearly_mean["Es"] + ds_yearly_mean["Ew"]
 )
 # Take mean across all latitudes
 ds_yearly_mean_lon_mean = ds_yearly_mean.mean(dim="lon")
+
+# %%  Figure 2: Yearly averages and total
+vmin_E = 0  # mm/year
+vmax_E = 1400  # mm/year
+cmap_E = make_custom_cmap(vmin_E, vmax_E)
 
 # All in one Figure
 # size height = approx 2/3 of A4 paper (8.27 x 11.69 inches)
@@ -145,7 +155,7 @@ with plt.rc_context({"font.size": 7}):
 
 # Save figure to png
 fig.savefig(
-    folder_figures / f"{yearly_averages_file.split('_')[0]}_yearly_averages.png",
+    folder_figures / f"{model_version}_yearly_averages.png",
     dpi=900,
     bbox_inches="tight",
 )
