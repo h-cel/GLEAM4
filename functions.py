@@ -11,6 +11,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
+import xarray as xr
 from matplotlib.colors import ListedColormap
 from matplotlib.projections import PolarAxes
 from scipy.stats import gaussian_kde
@@ -740,3 +741,107 @@ def data_logging(path, script_path):
     logging.info(f"Script path: {script_path}")
     logging.info(f"Git commit: {git_commit}")
     logging.info(f"Git repo: {git_repo}")
+
+
+# %% Functions below for calculating the area of a grid
+# These functions are taken from: https://github.com/lukegre/pySeaFlux/blob/3ecc2c7bedc121925be4056fa55f0e5a544eae64/pyseaflux/area.py
+# Minor modifications are added
+
+
+def earth_radius(lat):
+    """Calculate the radius of the earth for a given latitude
+
+    Formula as e.g. given in https://en.wikipedia.org/wiki/Earth_radius#Geocentric_radius
+
+    Parameters
+    -----------
+    lat: array_like, float
+        latitude value (-90 : 90)
+
+    Returns
+    -------
+        array_like, float: radius in metres
+    """
+
+    lat = np.deg2rad(lat)
+    a = 6378137.0  # equatorial radius in metres
+    b = 6356752.0  # polar radius in metres
+    r = (
+        ((a**2 * np.cos(lat)) ** 2 + (b**2 * np.sin(lat)) ** 2)
+        / ((a * np.cos(lat)) ** 2 + (b * np.sin(lat)) ** 2)
+    ) ** 0.5
+
+    return r
+
+
+def area_grid(lat, lon, return_dataarray=False):
+    """
+    Calculate the area of each grid cell for given lats and lons
+
+    Note that in spherical coordinate system (following [2]):
+    - lat = 90° - phi with phi the colatitude
+    - lon = theta
+
+    Parameters
+    ----------
+    lat : array_like
+        Latitudes in decimal degrees of length N
+    lon : array_like
+        Longitudes in decimal degrees of length M
+    return_dataarray : bool, optional
+        If True returns xr.DataArray, else numpy array. Default is False.
+
+    Returns
+    -------
+    area : numpy.ndarray or xarray.DataArray
+        Area of each grid cell in square meters. Shape is (M, N) if
+        return_dataarray=False, or DataArray with dims ['lat', 'lon']
+        if return_dataarray=True.
+
+    References
+    ----------
+    .. [1] https://github.com/chadagreene/CDT/blob/master/cdt/cdtarea.m
+    .. [2] https://mathworld.wolfram.com/SphericalCoordinates.html
+
+    """
+    ylat, xlon = np.meshgrid(lat, lon)
+    R = earth_radius(ylat)
+
+    # Calculate width and height of each pixel in radians
+    dlat = np.deg2rad(np.abs(np.gradient(ylat, axis=1)))
+    dlon = np.deg2rad(np.abs(np.gradient(xlon, axis=0)))
+
+    # Area based on calculation of unit area
+    dy = dlat * R
+    dx = dlon * R * np.cos(np.deg2rad(ylat))
+    area = dy * dx
+
+    if not return_dataarray:
+        return area
+    else:
+        xda = xr.DataArray(
+            area.T,
+            dims=["lat", "lon"],
+            coords={"lat": lat, "lon": lon},
+            attrs=dict(
+                long_name="Area per pixel",
+                units="m^2",
+                description=(
+                    "Area per pixel. The non-spherical shape of Earth is taken into account."
+                ),
+            ),
+        )
+
+        return xda
+
+
+def get_area_from_dataset(da):
+    """
+    Calculate the grid cell area from a xr.Dataset or xr.DataArray.
+    """
+    x = da.lon.values
+    y = da.lat.values
+
+    area = area_grid(y, x, return_dataarray=True)
+
+    return area
