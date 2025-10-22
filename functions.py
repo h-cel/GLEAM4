@@ -743,6 +743,13 @@ def data_logging(path, script_path):
     logging.info(f"Git repo: {git_repo}")
 
 
+# Function to normalize the grid values
+# def normalize(array: np.ndarray) -> np.ndarray:
+#     """Normalizes numpy arrays into scale 0.0 - 1.0"""
+#     array_min, array_max = array.min(), array.max()
+#     return (array - array_min) / (array_max - array_min)
+
+
 # %% Functions below for calculating the area of a grid
 # These functions are taken from: https://github.com/lukegre/pySeaFlux/blob/3ecc2c7bedc121925be4056fa55f0e5a544eae64/pyseaflux/area.py
 # Minor modifications are added

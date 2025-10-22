@@ -48,6 +48,16 @@ non_summing_vars = [
     "H",
 ]  # Variables that should be averaged, not summed when resampling temporally globally
 
+# %% Choice of variables for seasonal plots
+season_plot_var_dict = {
+    "E": {"vmin": 0, "vmax": 400, "units": "mm"},
+    "Ep": {"vmin": 0, "vmax": 800, "units": "mm"},
+    "S": {"vmin": 0, "vmax": 1, "units": "-"},
+    "SMrz": {"vmin": 0, "vmax": 1, "units": "m³/m³"},
+    "H": {"vmin": 0, "vmax": 120, "units": "W/m²"},
+}
+season_choice = ["JJA", "DJF"]
+
 # %% Colors
 color_dict = {
     "GLEAM4": "#09070d",

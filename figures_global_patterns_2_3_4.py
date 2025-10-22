@@ -8,6 +8,7 @@ import importlib
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import conf
 import functions
@@ -20,6 +21,8 @@ from conf import (
     folder_figures,
     folder_processed,
     model_version,
+    season_choice,
+    season_plot_var_dict,
     seasonal_averages_file,
     yearly_averages_file,
 )
@@ -248,5 +251,113 @@ ax.set_title(
     f"{model_version}: total E = {round(float(ds_summed['E'].values), 2):,} km³/yr"
 )
 fig.savefig(folder_figures / f"{model_version}_pie_chart_totals.png")
+
+# %% Figure 3: Season patterns
+
+with plt.rc_context({"font.size": 6}):
+    fig, axes = plt.subplots(
+        len(season_plot_var_dict),
+        len(season_choice),
+        figsize=(7, 11.69),
+        sharex=True,
+        sharey=True,
+        constrained_layout=True,
+    )  # A4 paper basically
+
+    for i, var in enumerate(season_plot_var_dict):
+        cmap_ = make_custom_cmap(
+            season_plot_var_dict[var]["vmin"], season_plot_var_dict[var]["vmax"]
+        )
+        for j, season in enumerate(season_choice):
+            img = (
+                ds_seasonal_mean[var]
+                .sel(season=season)
+                .plot.imshow(
+                    ax=axes[i, j],
+                    cmap=cmap_,
+                    vmin=season_plot_var_dict[var]["vmin"],
+                    vmax=season_plot_var_dict[var]["vmax"],
+                    add_colorbar=False,
+                )
+            )
+            # Only top row title
+            if i == 0:
+                axes[i, j].set_title(f"{season}")
+            else:
+                axes[i, j].set_title("")
+
+            # Only bottom row mentioning of longitude
+            if i == len(season_plot_var_dict) - 1:
+                axes[i, j].set_xlabel("Longitude [°]")
+            else:
+                axes[i, j].set_xlabel("")
+
+            if j == 0:
+                axes[i, j].set_ylabel("Latitude [°]")
+            else:
+                axes[i, j].set_ylabel("")
+
+            axes[i, j].set_facecolor(ocean_color)
+
+            cbar_ax = inset_axes(
+                axes[i, j],
+                width="4%",  # Width of colorbar
+                height="60%",  # Height of colorbar
+                loc="lower left",  # Location: 'upper left', 'upper right', 'lower left', 'lower right'
+            )
+            cbar = plt.colorbar(img, cax=cbar_ax, orientation="vertical")
+            cbar.set_label(f"{var} [{season_plot_var_dict[var]['units']}]")
+
+fig.savefig(folder_figures / f"{model_version}_seasonal_patterns.png", dpi=900)
+fig
+
+# %% Figure 4: Drivers of evaporation
+# To highlight the regions with lower Ep, you can use a gamma correction
+# For more info, see: https://en.wikipedia.org/wiki/Gamma_correction
+gammas = [1, 0.8]
+with plt.rc_context({"font.size": 7}):
+    for gamma in gammas:
+        fig, ax = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
+        (da_rgb**gamma).plot.imshow(ax=ax)
+        ax.set_title(
+            f"{model_version} RGB composite: Evaporative deficit (R), Aerodynamic (G), Radiative (B). γ = {gamma}"
+        )
+        ax.set_facecolor("black")
+        ax.set_xlabel("Longitude [°]")
+        ax.set_ylabel("Latitude [°]")
+        fig.savefig(
+            folder_figures
+            / f"{model_version}_drivers_of_evaporation_gamma_{gamma}.png",
+            dpi=900,
+        )
+fig
+
+# %% Figure 4 bis: pie chart of drivers of evaporation
+var_drivers = ["E_deficit", "E_aero", "E_rad"]
+
+# Percentages
+fig, ax = plt.subplots()
+ax.pie(
+    ds_summed[var_drivers].to_pandas().values,
+    labels=var_drivers,
+    autopct="%1.1f%%",
+    # autopct=lambda pct: autopct_format(pct, ds_summed[var_drivers].to_pandas().values),
+    colors=["red", "green", "blue"],
+)
+ax.set_title(f"{model_version}")
+fig.savefig(folder_figures / f"{model_version}_pie_chart_drivers_percentages.png")
+
+# Total values
+fig, ax = plt.subplots()
+ax.pie(
+    ds_summed[var_drivers].to_pandas().values,
+    labels=var_drivers,
+    autopct=lambda pct: autopct_format(pct, ds_summed[var_drivers].to_pandas().values),
+    colors=["red", "green", "blue"],
+)
+ax.set_title(
+    f"{model_version}: Total Ep = {round(float(ds_summed['Ep'].values), 2)} km³/yr"
+)
+fig.savefig(folder_figures / f"{model_version}_pie_chart_drivers_totals.png")
 
 # %%
