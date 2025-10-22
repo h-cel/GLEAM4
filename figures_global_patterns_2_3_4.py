@@ -39,6 +39,48 @@ ds_yearly_mean["Eo"] = (
 # Take mean across all latitudes
 ds_yearly_mean_lon_mean = ds_yearly_mean.mean(dim="lon")
 
+# Calculate drivers of evaporation
+ds_yearly_mean["E_deficit"] = ds_yearly_mean["Ep"] - ds_yearly_mean["E"]
+ds_yearly_mean["E_aero"] = (
+    ds_yearly_mean["Ep_aero"] / ds_yearly_mean["Ep"] * ds_yearly_mean["E"]
+)
+ds_yearly_mean["E_rad"] = (
+    ds_yearly_mean["Ep_rad"] / ds_yearly_mean["Ep"] * ds_yearly_mean["E"]
+)
+## RGB color composite based on drivers
+# Idea:
+# - Color = relative contribution of driver per pixel. Per pixel: driver / sum_of_drivers
+# - Brightness = Ep / maximum(Ep) per pixel
+# maximum(Ep) can also be a quantile -> clip rest of data to this quantile
+Ep_Q_95 = ds_yearly_mean["Ep"].quantile(0.95)
+Ep_clipped = ds_yearly_mean["Ep"].clip(max=Ep_Q_95)
+brightness = Ep_clipped / Ep_Q_95
+# Sum of all drivers per pixel
+da_sum_drivers = (
+    ds_yearly_mean["E_deficit"] + ds_yearly_mean["E_aero"] + ds_yearly_mean["E_rad"]
+)
+# Contribution per pixel
+redn = ds_yearly_mean["E_deficit"].clip(min=0) / da_sum_drivers * brightness
+greenn = ds_yearly_mean["E_aero"].clip(min=0) / da_sum_drivers * brightness
+bluen = ds_yearly_mean["E_rad"].clip(min=0) / da_sum_drivers * brightness
+rgb_array = np.dstack((redn, greenn, bluen)).clip(max=1)
+# Make a DataArray
+da_rgb = xr.DataArray(
+    data=rgb_array,
+    dims=["lat", "lon", "color"],
+    coords={
+        "lat": ds_yearly_mean.lat.values,
+        "lon": ds_yearly_mean.lon.values,
+        "color": ["red_deficit", "green_aero", "blue_rad"],
+    },
+)
+# Make a water mask based on yearly mean evaporation
+water_mask = ds_yearly_mean["E"].isnull()
+
+# Apply water mask to all datasets
+ds_yearly_mean = ds_yearly_mean.where(~water_mask)
+ds_seasonal_mean = ds_seasonal_mean.where(~water_mask)
+
 # %%  Figure 2: Yearly averages and total
 vmin_E = 0  # mm/year
 vmax_E = 1400  # mm/year
