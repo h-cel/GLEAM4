@@ -59,12 +59,21 @@ season_plot_var_dict = {
 season_choice = ["JJA", "DJF"]
 
 # %% Colors
+model_list_validation = ["GLEAM4", "GLEAM v3.8", "ERA5-Land", "FLUXCOM"]
 color_dict = {
-    "GLEAM4": "#09070d",
-    "GLEAM v3.8": "#6f6db1",
-    "ERA5-Land": "#cf6666",
-    "FLUXCOM": "#4a8740",
+    model_list_validation[0]: "#09070d",
+    model_list_validation[1]: "#6f6db1",
+    model_list_validation[2]: "#cf6666",
+    model_list_validation[3]: "#4a8740",
 }
+## As of 27/10/2025, FLUXCOM-X used for global patterns, not in-situ validation
+model_list_pattern = model_list_validation.copy()
+model_list_pattern[3] = "FLUXCOM-X"
+color_dict_pattern = color_dict.copy()
+color_dict_pattern.update(
+    {model_list_pattern[3]: color_dict_pattern.pop(model_list_validation[3])}
+)
+
 color_dict_lat = {
     "transpiration": "#7cc691",
     "bare soil evaporation": "#cc9a80",
@@ -82,3 +91,5 @@ site_selection = {
     "AU-How": "2010",
     "FR-Pue": "2016",
 }
+
+# %%

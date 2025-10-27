@@ -19,6 +19,7 @@ from conf import (
     folder_gridded_yearly,
     folder_processed,
     gleam_38_path,
+    model_list_pattern,
     model_version,
     non_summing_vars,
     seasonal_averages_file,
@@ -181,15 +182,16 @@ da_fluxcom_yearly_mean_compare = (
 
 ## Combine in 1 data-cube
 logging.info("Combining datasets in 1 cube")
+logging.info(f"List of models: {model_list_pattern}")
 ds_comparison_yearly = xr.concat(
     [
-        da_era5_yearly_mean_compare,
-        da_gleam38_yearly_mean_compare,
         da_gleam4_yearly_mean_compare,
+        da_gleam38_yearly_mean_compare,
+        da_era5_yearly_mean_compare,
         da_fluxcom_yearly_mean_compare,
     ],
     dim=xr.DataArray(
-        ["ERA5-Land", "GLEAM3.8a", "GLEAM4", "FLUXCOM-X"],
+        model_list_pattern,
         dims="product",
         name="product",
     ),
