@@ -80,6 +80,9 @@ ds_gleam38 = xr.open_mfdataset(gleam_38_path.glob("E_*_GLEAM_v3.8a_YR.nc"))
 # %% Calculate yearly means (full GLEAM4 dataset)
 logging.info("Computing average yearly values for full GLEAM4 dataset")
 ds_yearly_mean = ds_yearly.mean("time", skipna=True)
+# Derive water mask from its nan values for E
+water_mask = ds_yearly_mean["E"].isnull()
+ds_yearly_mean = ds_yearly_mean.where(~water_mask)
 ds_yearly_mean.to_netcdf(folder_processed / yearly_averages_file)
 
 # %% Calculate seasonal means (full GLEAM4 dataset)
@@ -106,6 +109,7 @@ for var in variables:
 
 # Combine all variables into one dataset
 ds_seasonal_mean = xr.open_mfdataset(ds_seasonal_mean_file_list)
+ds_seasonal_mean = ds_seasonal_mean.where(~water_mask)  # apply water mask
 ds_seasonal_mean.to_netcdf(folder_processed / seasonal_averages_file)
 
 # %% Find common period for all datasets
@@ -190,5 +194,7 @@ ds_comparison_yearly = xr.concat(
         name="product",
     ),
 )
-
+# Apply water mask
+ds_comparison_yearly = ds_comparison_yearly.where(~water_mask)
+# Write out
 ds_comparison_yearly.to_netcdf(folder_processed / yearly_averages_file_comparison)

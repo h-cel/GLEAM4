@@ -78,12 +78,7 @@ da_rgb = xr.DataArray(
         "color": ["red_deficit", "green_aero", "blue_rad"],
     },
 )
-# Make a water mask based on yearly mean evaporation
-water_mask = ds_yearly_mean["E"].isnull()
 
-# Apply water mask to all datasets
-ds_yearly_mean = ds_yearly_mean.where(~water_mask)
-ds_seasonal_mean = ds_seasonal_mean.where(~water_mask)
 
 # %%  Figure 2: Yearly averages and total
 vmin_E = 0  # mm/year
