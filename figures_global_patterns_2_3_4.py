@@ -43,11 +43,12 @@ ds_yearly_mean["Eo"] = (
 ds_yearly_mean_lon_mean = ds_yearly_mean.mean(dim="lon")
 
 # Calculate drivers of evaporation
-ds_yearly_mean["E_deficit"] = ds_yearly_mean["Ep"] - ds_yearly_mean["E"]
-ds_yearly_mean["E_aero"] = (
+var_drivers = ["E_deficit", "E_aero", "E_rad"]
+ds_yearly_mean[var_drivers[0]] = ds_yearly_mean["Ep"] - ds_yearly_mean["E"]
+ds_yearly_mean[var_drivers[1]] = (
     ds_yearly_mean["Ep_aero"] / ds_yearly_mean["Ep"] * ds_yearly_mean["E"]
 )
-ds_yearly_mean["E_rad"] = (
+ds_yearly_mean[var_drivers[2]] = (
     ds_yearly_mean["Ep_rad"] / ds_yearly_mean["Ep"] * ds_yearly_mean["E"]
 )
 ## RGB color composite based on drivers
@@ -333,7 +334,6 @@ with plt.rc_context({"font.size": 7}):
 fig
 
 # %% Figure 4 bis: pie chart of drivers of evaporation
-var_drivers = ["E_deficit", "E_aero", "E_rad"]
 
 # Percentages
 fig, ax = plt.subplots()
