@@ -73,7 +73,7 @@ color_dict_lat = {
 }
 violin_fill_color = "#484948"
 insitu_fill_color = "darkgray"
-
+ocean_color = "#CDE0E4"
 
 # %% Sites
 site_selection = {

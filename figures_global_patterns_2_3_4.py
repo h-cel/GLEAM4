@@ -21,6 +21,7 @@ from conf import (
     folder_figures,
     folder_processed,
     model_version,
+    ocean_color,
     season_choice,
     season_plot_var_dict,
     seasonal_averages_file,
@@ -88,8 +89,6 @@ cmap_E = make_custom_cmap(vmin_E, vmax_E)
 # All in one Figure
 # size height = approx 2/3 of A4 paper (8.27 x 11.69 inches)
 fontsize_in_figure = 12
-ocean_color = "#CDE0E4"
-ocean_alpha = 0.5
 with plt.rc_context({"font.size": 7}):
     fig = plt.figure(figsize=(7, 2 / 3 * 11.69))
     axd = fig.subplot_mosaic(
