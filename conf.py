@@ -84,6 +84,8 @@ violin_fill_color = "#484948"
 insitu_fill_color = "darkgray"
 ocean_color = "#CDE0E4"
 
+# %% png saving: Figures 2,3,4,5
+dpi = 900
 # %% Sites
 site_selection = {
     "DE-Tha": "2003",

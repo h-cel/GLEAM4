@@ -18,6 +18,7 @@ importlib.reload(functions)
 
 from conf import (
     color_dict_lat,
+    dpi,
     folder_figures,
     folder_processed,
     model_version,
@@ -200,7 +201,7 @@ fig.savefig(
         f"{model_version}_yearly_averages_fig_2_"
         f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
     ),
-    dpi=900,
+    dpi=dpi,
     bbox_inches="tight",
 )
 fig
@@ -329,7 +330,7 @@ fig.savefig(
         f"{model_version}_seasonal_patterns_fig_3_"
         f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
     ),
-    dpi=900,
+    dpi=dpi,
 )
 fig
 
@@ -357,7 +358,7 @@ with plt.rc_context({"font.size": 7}):
                 f"{model_version}_drivers_of_evaporation_fig_4_"
                 f"{ds_yearly_mean.attrs['years_used_for_averaging']}_gamma_{gamma}.png"
             ),
-            dpi=900,
+            dpi=dpi,
         )
 fig
 
