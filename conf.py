@@ -4,20 +4,87 @@ from pathlib import Path
 # %% In situ data doi
 zenodo_doi = "10.5281/zenodo.14054258"
 
+# %% Google earth engine
+GEE_PROJECT_ID = "ee-bonteolivier15"  # Replace by your own project ID
+
 # %% Paths
 folder_insitu = Path("data/sites")
 folder_figures = Path("figures")
 
+# GLEAM 4 Paths
+folder_gridded = Path(
+    "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.2a/GLEAM4.2_DA/processed"
+)  # Adapt this path for your computer: point to folder with
+# GLEAM outputs as found on the SFTP server (https://www.gleam.eu/#downloads)
+folder_gridded_monthly = folder_gridded / "monthly"
+folder_gridded_yearly = folder_gridded / "yearly"
+
+# Processed data for plotting
+folder_processed = Path("data/processed")
+
+model_version = "GLEAM4.2a"
+seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
+yearly_averages_file = f"{model_version}_yearly_averages.nc"
+yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
+
+# For data downloading of external products
+# Adapt these path for your computer if not on UGhent-HPC system
+gleam_38_path = Path(
+    "/data/gent/vo/000/gvo00090/GLEAM/data/data/GLEAM_v3.8/v38a_output/yearly/E"
+)  # Data read from this path (no download script provided)
+era5_land_path = (
+    Path("/data/gent/vo/000/gvo00090/EXT/data/ERA5_Land") / "total_evaporation"
+)  # Data downloaded to and read from this path
+fluxcom_x_base_path = (
+    Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE") / "ET"
+)  # Data downloaded to and read from this path
+
+# %% Global averaging for global patterns
+non_summing_vars = [
+    "S",
+    "SMs",
+    "SMrz",
+    "H",
+]  # Variables that should be averaged, not summed when resampling temporally globally
+E_plot_dict = {"vmin": 0, "vmax": 1400}
+# %% Choice of variables for seasonal plots
+season_plot_var_dict = {
+    "E": {"vmin": 0, "vmax": 400, "units": "mm"},
+    "Ep": {"vmin": 0, "vmax": 800, "units": "mm"},
+    "S": {"vmin": 0, "vmax": 1, "units": "-"},
+    "SMrz": {"vmin": 0, "vmax": 1, "units": "m³/m³"},
+    "H": {"vmin": 0, "vmax": 120, "units": "W/m²"},
+}
+season_choice = ["JJA", "DJF"]
+
 # %% Colors
+model_list_validation = ["GLEAM4", "GLEAM v3.8", "ERA5-Land", "FLUXCOM"]
 color_dict = {
-    "GLEAM4": "#09070d",
-    "GLEAM v3.8": "#6f6db1",
-    "ERA5-Land": "#cf6666",
-    "FLUXCOM": "#4a8740",
+    model_list_validation[0]: "#09070d",
+    model_list_validation[1]: "#6f6db1",
+    model_list_validation[2]: "#cf6666",
+    model_list_validation[3]: "#4a8740",
+}
+## As of 27/10/2025, FLUXCOM-X used for global patterns, not in-situ validation
+model_list_pattern = model_list_validation.copy()
+model_list_pattern[3] = "FLUXCOM-X"
+color_dict_pattern = color_dict.copy()
+color_dict_pattern.update(
+    {model_list_pattern[3]: color_dict_pattern.pop(model_list_validation[3])}
+)
+
+color_dict_lat = {
+    "transpiration": "#7cc691",
+    "bare soil evaporation": "#cc9a80",
+    "interception": "#cce7f8",
+    "other": "#989899",
 }
 violin_fill_color = "#484948"
 insitu_fill_color = "darkgray"
+ocean_color = "#CDE0E4"
 
+# %% png saving: Figures 2,3,4,5
+dpi = 900
 # %% Sites
 site_selection = {
     "DE-Tha": "2003",
@@ -25,3 +92,5 @@ site_selection = {
     "AU-How": "2010",
     "FR-Pue": "2016",
 }
+
+# %%

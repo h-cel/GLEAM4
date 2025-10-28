@@ -5,10 +5,16 @@ dependencies:
   - python=3.12
   - pandas=2.2.*
   - xarray=2024.09.0
-  - netCDF4
+  - dask=2025.9.*
+  - flox=0.10.*
+  - netCDF4=1.7.*
+  - xee=0.0.20
+  # - earthkit-data
   - seaborn=0.13.*
   - ipykernel
   - cftime
   - pip
   - pip:
-    - zenodo-get 
+      - zenodo-get
+      - icoscp_core=0.3.*
+      # - cdsapi
