@@ -1,10 +1,6 @@
 # %% Imports
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.colors import ListedColormap
-
 # %% In situ data doi
 zenodo_doi = "10.5281/zenodo.14054258"
 
