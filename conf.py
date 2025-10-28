@@ -18,8 +18,8 @@ folder_figures = Path("figures")
 # GLEAM 4 Paths
 folder_gridded = Path(
     "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.2a/GLEAM4.2_DA/processed"
-    # "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.2b/GLEAM4.2b_DA/processed"
-)
+)  # Adapt this path for your computer: point to folder with
+# GLEAM outputs as found on the SFTP server (https://www.gleam.eu/#downloads)
 folder_gridded_monthly = folder_gridded / "monthly"
 folder_gridded_yearly = folder_gridded / "yearly"
 
@@ -34,7 +34,7 @@ yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.n
 # For data downloading of external products
 gleam_38_path = Path(
     "/data/gent/vo/000/gvo00090/GLEAM/data/data/GLEAM_v3.8/v38a_output/yearly/E"
-)
+)  # Adapt this path for your computer if not on UGhent-HPC system
 era5_land_path = (
     Path("/data/gent/vo/000/gvo00090/EXT/data/ERA5_Land") / "total_evaporation"
 )
