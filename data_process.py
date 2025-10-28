@@ -36,6 +36,7 @@ folder_figures.mkdir(exist_ok=True)
 data_logging(folder_processed, __file__)
 
 # %% Read in GLEAM4 data
+logging.info(f"GLEAM4 model version: {model_version}")
 logging.info("Reading in GLEAM4 data")
 ## Variables and years
 variables = [folder.name for folder in folder_gridded_monthly.iterdir()]
