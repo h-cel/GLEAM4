@@ -28,13 +28,16 @@ yearly_averages_file = f"{model_version}_yearly_averages.nc"
 yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
 
 # For data downloading of external products
+# Adapt these path for your computer if not on UGhent-HPC system
 gleam_38_path = Path(
     "/data/gent/vo/000/gvo00090/GLEAM/data/data/GLEAM_v3.8/v38a_output/yearly/E"
-)  # Adapt this path for your computer if not on UGhent-HPC system
+)  # Data read from this path (no download script provided)
 era5_land_path = (
     Path("/data/gent/vo/000/gvo00090/EXT/data/ERA5_Land") / "total_evaporation"
-)
-fluxcom_x_base_path = Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE") / "ET"
+)  # Data downloaded to and read from this path
+fluxcom_x_base_path = (
+    Path("/data/gent/vo/000/gvo00090/EXT/data/FLUXCOM_X_BASE") / "ET"
+)  # Data downloaded to and read from this path
 
 # %% Global averaging for global patterns
 non_summing_vars = [
