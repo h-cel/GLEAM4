@@ -54,7 +54,7 @@ ds_yearly_mean[var_drivers[2]] = (
 )
 ## RGB color composite based on drivers
 # Idea:
-# - Color = relative contribution of driver per pixel. Per pixel: driver / sum_of_drivers
+# - Color = relative contribution of driver per pixel: driver / sum_of_drivers
 # - Brightness = Ep / maximum(Ep) per pixel
 # maximum(Ep) can also be a quantile -> clip rest of data to this quantile
 Ep_Q_95 = ds_yearly_mean["Ep"].quantile(0.95)
@@ -191,9 +191,15 @@ with plt.rc_context({"font.size": 7}):
     fig.colorbar(
         img, ax=[axd["E"], axd["F"]], location="bottom", label="mm/year", shrink=0.4
     )
+# Set title
+fig.suptitle(f"{model_version}: {ds_yearly_mean.attrs['years_used_for_averaging']}")
 # Save figure to png
 fig.savefig(
-    folder_figures / f"{model_version}_yearly_averages.png",
+    folder_figures
+    / (
+        f"{model_version}_yearly_averages_fig_2_"
+        f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
+    ),
     dpi=900,
     bbox_inches="tight",
 )
@@ -221,8 +227,14 @@ ax.pie(
     autopct="%1.1f%%",
     colors=color_dict_lat.values(),
 )
-ax.set_title(f"{model_version}")
-fig.savefig(folder_figures / f"{model_version}_pie_chart_percentages.png")
+ax.set_title(f"{model_version}: {ds_yearly_mean.attrs['years_used_for_averaging']}")
+fig.savefig(
+    folder_figures
+    / (
+        f"{model_version}_pie_chart_percentages_"
+        f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
+    )
+)
 
 
 # absolute values
@@ -241,9 +253,18 @@ ax.pie(
     colors=color_dict_lat.values(),
 )
 ax.set_title(
-    f"{model_version}: total E = {round(float(ds_summed['E'].values), 2):,} km³/yr"
+    (
+        f"{model_version}: {ds_yearly_mean.attrs['years_used_for_averaging']}, "
+        f"total E = {round(float(ds_summed['E'].values), 2):,} km³/yr"
+    )
 )
-fig.savefig(folder_figures / f"{model_version}_pie_chart_totals.png")
+fig.savefig(
+    folder_figures
+    / (
+        f"{model_version}_pie_chart_totals_"
+        f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
+    )
+)
 
 # %% Figure 3: Season patterns
 
@@ -296,12 +317,20 @@ with plt.rc_context({"font.size": 6}):
                 axes[i, j],
                 width="4%",  # Width of colorbar
                 height="60%",  # Height of colorbar
-                loc="lower left",  # Location: 'upper left', 'upper right', 'lower left', 'lower right'
+                loc="lower left",
             )
             cbar = plt.colorbar(img, cax=cbar_ax, orientation="vertical")
             cbar.set_label(f"{var} [{season_plot_var_dict[var]['units']}]")
+fig.suptitle(f"{model_version}: {ds_yearly_mean.attrs['years_used_for_averaging']}")
 
-fig.savefig(folder_figures / f"{model_version}_seasonal_patterns.png", dpi=900)
+fig.savefig(
+    folder_figures
+    / (
+        f"{model_version}_seasonal_patterns_fig_3_"
+        f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
+    ),
+    dpi=900,
+)
 fig
 
 # %% Figure 4: Drivers of evaporation
@@ -313,14 +342,21 @@ with plt.rc_context({"font.size": 7}):
         fig, ax = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
         (da_rgb**gamma).plot.imshow(ax=ax)
         ax.set_title(
-            f"{model_version} RGB composite: Evaporative deficit (R), Aerodynamic (G), Radiative (B). γ = {gamma}"
+            (
+                f"{model_version} {ds_yearly_mean.attrs['years_used_for_averaging']} "
+                f"RGB composite: Evaporative deficit (R), Aerodynamic (G), "
+                f"Radiative (B). γ = {gamma}"
+            )
         )
         ax.set_facecolor("black")
         ax.set_xlabel("Longitude [°]")
         ax.set_ylabel("Latitude [°]")
         fig.savefig(
             folder_figures
-            / f"{model_version}_drivers_of_evaporation_gamma_{gamma}.png",
+            / (
+                f"{model_version}_drivers_of_evaporation_fig_4_"
+                f"{ds_yearly_mean.attrs['years_used_for_averaging']}_gamma_{gamma}.png"
+            ),
             dpi=900,
         )
 fig
@@ -333,11 +369,16 @@ ax.pie(
     ds_summed[var_drivers].to_pandas().values,
     labels=var_drivers,
     autopct="%1.1f%%",
-    # autopct=lambda pct: autopct_format(pct, ds_summed[var_drivers].to_pandas().values),
     colors=["red", "green", "blue"],
 )
-ax.set_title(f"{model_version}")
-fig.savefig(folder_figures / f"{model_version}_pie_chart_drivers_percentages.png")
+ax.set_title(f"{model_version}: {ds_yearly_mean.attrs['years_used_for_averaging']}")
+fig.savefig(
+    folder_figures
+    / (
+        f"{model_version}_pie_chart_drivers_percentages_"
+        f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
+    )
+)
 
 # Total values
 fig, ax = plt.subplots()
@@ -348,8 +389,17 @@ ax.pie(
     colors=["red", "green", "blue"],
 )
 ax.set_title(
-    f"{model_version}: Total Ep = {round(float(ds_summed['Ep'].values), 2)} km³/yr"
+    (
+        f"{model_version}: {ds_yearly_mean.attrs['years_used_for_averaging']}, "
+        f"Total Ep = {round(float(ds_summed['Ep'].values), 2)} km³/yr"
+    )
 )
-fig.savefig(folder_figures / f"{model_version}_pie_chart_drivers_totals.png")
+fig.savefig(
+    folder_figures
+    / (
+        f"{model_version}_pie_chart_drivers_totals_"
+        f"{ds_yearly_mean.attrs['years_used_for_averaging']}.png"
+    )
+)
 
 # %%

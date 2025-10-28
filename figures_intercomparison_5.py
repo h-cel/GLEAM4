@@ -95,7 +95,8 @@ for letter, product in zip(["D", "E", "F"], model_list_others):
     ax[letter].set_facecolor(ocean_color)
 
 # Adding colorbars
-# Key tip: use "constrained layout" https://matplotlib.org/stable/users/explain/axes/colorbar_placement.html
+# Key tip: use "constrained layout"
+# https://matplotlib.org/stable/users/explain/axes/colorbar_placement.html
 fig.colorbar(img_E, ax=ax["C"], location="bottom", shrink=0.8, label="[mm/year]")
 fig.colorbar(img_diff, ax=ax["F"], location="bottom", shrink=0.8, label="[mm/year]")
 
@@ -114,9 +115,15 @@ for text, product in zip(legend.get_texts(), model_list_pattern):
 ax["G"].set_title("")
 ax["G"].set_ylabel("Latitude")
 ax["G"].set_xlabel("[mm/year]")
+# Set title for entire figure
+fig.suptitle(f"{model_version}: {da_comp.attrs['years_considered']}")
 # Save to high quality png
 fig.savefig(
-    folder_figures / f"{model_version}_global_product_intercomparison_fig_5.png",
+    folder_figures
+    / (
+        f"{model_version}_global_product_intercomparison_fig_5_"
+        f"{da_comp.attrs['years_considered']}.png"
+    ),
     dpi=900,
 )
 # %%
