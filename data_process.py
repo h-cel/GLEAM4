@@ -85,6 +85,9 @@ ds_yearly_mean = ds_yearly.mean("time", skipna=True)
 # Derive water mask from its nan values for E
 water_mask = ds_yearly_mean["E"].isnull()
 ds_yearly_mean = ds_yearly_mean.where(~water_mask)
+ds_yearly_mean.attrs["years_used_for_averaging"] = (
+    f"{ds_yearly.time.min().dt.year.values} - {ds_yearly.time.max().dt.year.values}"
+)
 ds_yearly_mean.to_netcdf(folder_processed / yearly_averages_file)
 
 # %% Calculate seasonal means (full GLEAM4 dataset)
@@ -112,6 +115,9 @@ for var in variables:
 # Combine all variables into one dataset
 ds_seasonal_mean = xr.open_mfdataset(ds_seasonal_mean_file_list)
 ds_seasonal_mean = ds_seasonal_mean.where(~water_mask)  # apply water mask
+ds_seasonal_mean.attrs["years_used_for_averaging"] = (
+    f"{ds_monthly.time.min().dt.year.values} - {ds_monthly.time.max().dt.year.values}"
+)
 ds_seasonal_mean.to_netcdf(folder_processed / seasonal_averages_file)
 
 # %% Find common period for all datasets
@@ -199,5 +205,7 @@ ds_comparison_yearly = xr.concat(
 )
 # Apply water mask
 ds_comparison_yearly = ds_comparison_yearly.where(~water_mask)
+# Add info on period used
+ds_comparison_yearly.attrs["years_considered"] = f"{year_min} - {year_max}"
 # Write out
 ds_comparison_yearly.to_netcdf(folder_processed / yearly_averages_file_comparison)
