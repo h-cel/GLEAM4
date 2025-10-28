@@ -90,7 +90,7 @@ cmap_E = make_custom_cmap(vmin_E, vmax_E)
 # size height = approx 2/3 of A4 paper (8.27 x 11.69 inches)
 fontsize_in_figure = 12
 with plt.rc_context({"font.size": 7}):
-    fig = plt.figure(figsize=(7, 2 / 3 * 11.69))
+    fig = plt.figure(figsize=(7, 2 / 3 * 11.69), layout="constrained")
     axd = fig.subplot_mosaic(
         """
         ABBB
@@ -188,11 +188,9 @@ with plt.rc_context({"font.size": 7}):
     axd["F"].set_facecolor(ocean_color)
 
     # Colorbars
-    fig.subplots_adjust(bottom=0.1)
-    cbar_ax = fig.add_axes([0.3, 0.02, 0.4, 0.02])  # [left, bottom, width, height]
-    cbar = fig.colorbar(img, cax=cbar_ax, orientation="horizontal")
-    cbar.set_label("mm/year")
-
+    fig.colorbar(
+        img, ax=[axd["E"], axd["F"]], location="bottom", label="mm/year", shrink=0.4
+    )
 # Save figure to png
 fig.savefig(
     folder_figures / f"{model_version}_yearly_averages.png",
