@@ -16,7 +16,7 @@ ee.Initialize(
 )
 
 # Authentication ICOS
-# auth.init_config_file()  # Only do this once per computer!
+auth.init_config_file()  # Only do this once per computer!
 
 era5_land_path.mkdir(exist_ok=True, parents=True)
 fluxcom_x_base_path.mkdir(exist_ok=True, parents=True)
