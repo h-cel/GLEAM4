@@ -52,6 +52,9 @@ df_soi = pd.read_table(
 df_soi_cleaned = pd.DataFrame.from_dict(
     {"year": df_soi[0], "soi": df_soi[13]}
 ).set_index("year")
+df_soi_cleaned = (
+    df_soi_cleaned * 10
+)  # By convention, see https://www.bom.gov.au/climate/enso/soi/
 df_soi_cleaned.to_csv(folder_sotc / filename_soi_processed)
 
 # %% Read in yearly and monthly data
