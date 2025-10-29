@@ -6,13 +6,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
+import rootutils
 import xarray as xr
 
-# Add parent directory to path
-main_repo_folder = Path(__file__).parent.parent
-sys.path.insert(1, str(main_repo_folder))
-
-# Now import normally
+# Set up root directory with rootutils
+rootutils.setup_root(
+    search_from=__file__,
+    indicator=".project-root",
+    pythonpath=True,  # add root directory to the PYTHONPATH (allows imports from root)
+)
 
 from conf import (
     base_period,
@@ -26,18 +28,18 @@ from conf import (
 )
 from functions import data_logging
 
-(main_repo_folder / folder_sotc).mkdir(exist_ok=True, parents=True)
+folder_sotc.mkdir(exist_ok=True, parents=True)
 
-data_logging(main_repo_folder / folder_sotc, __file__)  # set up logging
+data_logging(folder_sotc, __file__)  # set up logging
 # %% Download Southern Oscillation Index (SOI) data
 # https://crudata.uea.ac.uk/cru/data/soi/
 logging.info("Downloading and processing Southern Oscillation Index (SOI) data")
 query_parameters = {"downloadformat": "txt"}
 response = requests.get(url_soi_cru, params=query_parameters)
-with open(main_repo_folder / folder_sotc / filename_soi_raw, "wb") as f:
+with open(folder_sotc / filename_soi_raw, "wb") as f:
     f.write(response.content)
 df_soi = pd.read_table(
-    main_repo_folder / folder_sotc / filename_soi_raw,
+    folder_sotc / filename_soi_raw,
     header=None,
     sep=r"\s+",
     na_values=-99.99,
@@ -46,7 +48,7 @@ df_soi = pd.read_table(
 df_soi_cleaned = pd.DataFrame.from_dict(
     {"year": df_soi[0], "soi": df_soi[13]}
 ).set_index("year")
-df_soi_cleaned.to_csv(main_repo_folder / folder_sotc / filename_soi_processed)
+df_soi_cleaned.to_csv(folder_sotc / filename_soi_processed)
 
 # %% Read in yearly and monthly data
 logging.info("Reading in yearly GLEAM data")

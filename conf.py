@@ -1,6 +1,10 @@
 # %% Imports
 from pathlib import Path
 
+import rootutils
+
+root_path = rootutils.find_root(search_from=__file__, indicator=".project-root")
+
 # %% In situ data doi
 zenodo_doi = "10.5281/zenodo.14054258"
 
@@ -8,8 +12,8 @@ zenodo_doi = "10.5281/zenodo.14054258"
 GEE_PROJECT_ID = "ee-bonteolivier15"  # Replace by your own project ID
 
 # %% Paths
-folder_insitu = Path("data/sites")
-folder_figures = Path("figures")
+folder_insitu = root_path / "data" / "sites"
+folder_figures = root_path / "figures"
 
 # GLEAM 4 Paths
 folder_gridded = Path(
@@ -20,10 +24,8 @@ folder_gridded_monthly = folder_gridded / "monthly"
 folder_gridded_yearly = folder_gridded / "yearly"
 
 # Processed data for plotting
-# Note: scripts are written in a way that these are expected to be at the root level
-# of the repo (alongside README.md etc.)
-folder_processed = Path("data/processed")
-folder_sotc = Path("data/sotc")
+folder_processed = root_path / "data" / "processed"
+folder_sotc = root_path / "data" / "sotc"
 
 model_version = "GLEAM4.2a"
 seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
