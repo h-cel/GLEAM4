@@ -20,12 +20,21 @@ folder_gridded_monthly = folder_gridded / "monthly"
 folder_gridded_yearly = folder_gridded / "yearly"
 
 # Processed data for plotting
+# Note: scripts are written in a way that these are expected to be at the root level
+# of the repo (alongside README.md etc.)
 folder_processed = Path("data/processed")
+folder_sotc = Path("data/sotc")
 
 model_version = "GLEAM4.2a"
 seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
 yearly_averages_file = f"{model_version}_yearly_averages.nc"
 yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
+
+# SotC
+url_soi_cru = "https://crudata.uea.ac.uk/cru/data/soi/soi_3dp.dat"
+# More info on dataset: https://crudata.uea.ac.uk/cru/data/soi/
+filename_soi_raw = "soi_cru_raw.txt"
+filename_soi_processed = "soi_cru_processed.csv"
 
 # For data downloading of external products
 # Adapt these path for your computer if not on UGhent-HPC system
@@ -93,4 +102,6 @@ site_selection = {
     "FR-Pue": "2016",
 }
 
-# %%
+# %% SotC options
+base_period = ["1991", "2020"]
+year_of_interest = "2024"
