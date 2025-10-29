@@ -16,5 +16,6 @@ dependencies:
   - pip
   - pip:
       - zenodo-get
-      - icoscp_core=0.3.*
+      - icoscp_core==0.3.*
+      - rootutils==1.0.*
       # - cdsapi
