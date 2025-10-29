@@ -18,8 +18,12 @@ rootutils.setup_root(
 
 from conf import (
     base_period,
+    dict_region,
+    filename_monthly_anomalies_per_lat,
     filename_soi_processed,
     filename_soi_raw,
+    filename_spatial_anomaly,
+    filename_yearly_anomalies,
     folder_gridded_monthly,
     folder_gridded_yearly,
     folder_sotc,
@@ -86,11 +90,7 @@ da_temporal_mean = (
 # https://docs.xarray.dev/en/stable/examples/area_weighted_temperature.html#Creating-weights
 # weights = np.cos(np.deg2rad(ds_yearly["lat"]))
 logging.info("Spatial mean per region for evaporation per year (including anomalies)")
-dict_region = {
-    "global": {"lat_min": -90, "lat_max": 90},
-    "NH": {"lat_min": 0, "lat_max": 90},
-    "SH": {"lat_min": -90, "lat_max": 0},
-}
+
 da_anomaly_dict = {}
 for region in dict_region:
     # Select per region
@@ -120,6 +120,11 @@ da_yearly_anomalies = xr.concat(
     list(da_anomaly_dict.values()),
     dim=xr.DataArray(list(da_anomaly_dict.keys()), dims="region", name="region"),
 )
+# Write out
+da_yearly_anomalies.attrs["base_period_anomaly"] = (
+    f"{base_period[0]} - {base_period[1]}"
+)
+da_yearly_anomalies.to_netcdf(folder_sotc / filename_yearly_anomalies)
 
 # %% Spatial anomaly for one year
 logging.info(
@@ -129,6 +134,9 @@ logging.info(
 da_spatial_anomaly = (
     ds_yearly["E"].sel(time=year_of_interest) - da_temporal_mean
 ).compute()
+# Write out
+da_spatial_anomaly.attrs["base_period_anomaly"] = f"{base_period[0]} - {base_period[1]}"
+da_spatial_anomaly.to_netcdf(folder_sotc / filename_spatial_anomaly)
 
 # %% Monthly climatology per latitude
 logging.info(
@@ -152,3 +160,8 @@ logging.info("Computing monthly anomalies per latitude per year")
 da_monthly_anomalies_per_lat = (
     da_monthly_per_lat.groupby("time.month") - da_monthly_climatology_per_lat
 )
+# Write out
+da_monthly_anomalies_per_lat.attrs["base_period_anomaly"] = (
+    f"{base_period[0]} - {base_period[1]}"
+)
+da_monthly_anomalies_per_lat.to_netcdf(folder_sotc / filename_monthly_anomalies_per_lat)

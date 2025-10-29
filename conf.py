@@ -32,11 +32,14 @@ seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
 yearly_averages_file = f"{model_version}_yearly_averages.nc"
 yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
 
-# SotC
+# SotC Paths
 url_soi_cru = "https://crudata.uea.ac.uk/cru/data/soi/soi_3dp.dat"
 # More info on dataset: https://crudata.uea.ac.uk/cru/data/soi/
 filename_soi_raw = "soi_cru_raw.txt"
 filename_soi_processed = "soi_cru_processed.csv"
+filename_yearly_anomalies = f"{model_version}_yearly_anomalies.nc"
+filename_spatial_anomaly = f"{model_version}_spatial_anomaly.nc"
+filename_monthly_anomalies_per_lat = f"{model_version}_monthly_anomalies_per_lat.nc"
 
 # For data downloading of external products
 # Adapt these path for your computer if not on UGhent-HPC system
@@ -107,3 +110,8 @@ site_selection = {
 # %% SotC options
 base_period = ["1991", "2020"]
 year_of_interest = "2024"
+dict_region = {
+    "global": {"lat_min": -90, "lat_max": 90, "color": "#0b141c"},
+    "NH": {"lat_min": 0, "lat_max": 90, "color": "#2525fe"},
+    "SH": {"lat_min": -90, "lat_max": 0, "color": "#fe1b1a"},
+}
