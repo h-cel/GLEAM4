@@ -111,7 +111,18 @@ site_selection = {
 base_period = ["1991", "2020"]
 year_of_interest = "2024"
 dict_region = {
-    "global": {"lat_min": -90, "lat_max": 90, "color": "#0b141c"},
-    "NH": {"lat_min": 0, "lat_max": 90, "color": "#2525fe"},
-    "SH": {"lat_min": -90, "lat_max": 0, "color": "#fe1b1a"},
+    "global": {"lat_min": -90, "lat_max": 90, "color": "#0b141c", "label": "Globe"},
+    "NH": {
+        "lat_min": 0,
+        "lat_max": 90,
+        "color": "#2525fe",
+        "label": "N. Hemisphere",
+    },
+    "SH": {
+        "lat_min": -90,
+        "lat_max": 0,
+        "color": "#fe1b1a",
+        "label": "S. Hemisphere",
+    },
 }
+soi_fill_colors = {"pos": "#84cefc", "neg": "#f37f7c"}
