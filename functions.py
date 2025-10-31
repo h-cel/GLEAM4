@@ -6,6 +6,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
+import matplotlib.colors as mcolors
 import matplotlib.pylab as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
@@ -577,6 +578,45 @@ def make_custom_cmap(vmin, vmax):
         # Start sampling the colormap only from 0.2 to prevent colors being too white
     new_cmap = ListedColormap(colors, name="Custom_Cmap")
     return new_cmap
+
+
+def make_custom_cmap_sotc(abs_lim, spacing, vmin, vmax, cmap):
+    """
+    Create a custom colormap for the State of the Climate plots.
+    We want a discrete colormap with specific spacing between -abs_lim and abs_lim.
+    All values in [vmin, -abs_lim] and [abs_lim, vmax] are grouped in 1 bin each.
+
+    Parameters
+    ----------
+    abs_lim: float or int
+        Absolute value of the limit of your colormap
+    spacing: float or int
+        Interval spacing covered by each bin of the colormap
+    vmin: float or int
+        Minimum value of your data
+    vmax: float or int
+        Maximum value of your data
+    cmap: string
+        Name of the matplotlib colormap to use as base
+
+    Returns
+    -------
+    inner_ticks: np.array
+        Tick values for the colorbar
+    new_cmap: matplotlib.colors.LinearSegmentedColormap
+        Custom colormap
+    norm: matplotlib.colors.BoundaryNorm
+        Normalization for the colormap
+    """
+    inner_ticks = np.arange(-abs_lim, abs_lim + spacing, spacing)
+    full_range = np.concatenate([[vmin], inner_ticks, [vmax]])
+    new_cmap = plt.get_cmap(cmap, len(full_range) - 1)
+    norm = mcolors.BoundaryNorm(
+        boundaries=full_range,  # Limits of the colorsbar
+        ncolors=new_cmap.N,
+        extend="neither",
+    )
+    return inner_ticks, new_cmap, norm
 
 
 def plot_taylor(path_in, path_out, format=".pdf"):
