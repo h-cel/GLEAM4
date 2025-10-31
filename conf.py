@@ -126,3 +126,5 @@ dict_region = {
     },
 }
 soi_fill_colors = {"pos": "#84cefc", "neg": "#f37f7c"}
+colorbar_hovmoller = {"abs_lim": 10, "spacing": 2, "cmap": "BrBG"}
+colorbar_spatial_anomaly = {"abs_lim": 200, "spacing": 50, "cmap": "BrBG"}
