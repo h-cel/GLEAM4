@@ -11,10 +11,12 @@ dependencies:
   - xee=0.0.20
   # - earthkit-data
   - seaborn=0.13.*
+  - cartopy=0.25.*
   - ipykernel
   - cftime
   - pip
   - pip:
       - zenodo-get
-      - icoscp_core=0.3.*
+      - icoscp_core==0.3.*
+      - rootutils==1.0.*
       # - cdsapi

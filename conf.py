@@ -1,6 +1,10 @@
 # %% Imports
 from pathlib import Path
 
+import rootutils
+
+root_path = rootutils.find_root(search_from=__file__, indicator=".project-root")
+
 # %% In situ data doi
 zenodo_doi = "10.5281/zenodo.14054258"
 
@@ -8,8 +12,8 @@ zenodo_doi = "10.5281/zenodo.14054258"
 GEE_PROJECT_ID = "ee-bonteolivier15"  # Replace by your own project ID
 
 # %% Paths
-folder_insitu = Path("data/sites")
-folder_figures = Path("figures")
+folder_insitu = root_path / "data" / "sites"
+folder_figures = root_path / "figures"
 
 # GLEAM 4 Paths
 folder_gridded = Path(
@@ -20,12 +24,22 @@ folder_gridded_monthly = folder_gridded / "monthly"
 folder_gridded_yearly = folder_gridded / "yearly"
 
 # Processed data for plotting
-folder_processed = Path("data/processed")
+folder_processed = root_path / "data" / "processed"
+folder_sotc = root_path / "data" / "sotc"
 
 model_version = "GLEAM4.2a"
 seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
 yearly_averages_file = f"{model_version}_yearly_averages.nc"
 yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
+
+# SotC Paths
+url_soi_cru = "https://crudata.uea.ac.uk/cru/data/soi/soi_3dp.dat"
+# More info on dataset: https://crudata.uea.ac.uk/cru/data/soi/
+filename_soi_raw = "soi_cru_raw.txt"
+filename_soi_processed = "soi_cru_processed.csv"
+filename_yearly_anomalies = f"{model_version}_yearly_anomalies.nc"
+filename_spatial_anomaly = f"{model_version}_spatial_anomaly.nc"
+filename_monthly_anomalies_per_lat = f"{model_version}_monthly_anomalies_per_lat.nc"
 
 # For data downloading of external products
 # Adapt these path for your computer if not on UGhent-HPC system
@@ -93,4 +107,24 @@ site_selection = {
     "FR-Pue": "2016",
 }
 
-# %%
+# %% SotC options
+base_period = ["1991", "2020"]
+year_of_interest = "2024"
+dict_region = {
+    "global": {"lat_min": -90, "lat_max": 90, "color": "#0b141c", "label": "Globe"},
+    "NH": {
+        "lat_min": 0,
+        "lat_max": 90,
+        "color": "#2525fe",
+        "label": "N. Hemisphere",
+    },
+    "SH": {
+        "lat_min": -90,
+        "lat_max": 0,
+        "color": "#fe1b1a",
+        "label": "S. Hemisphere",
+    },
+}
+soi_fill_colors = {"pos": "#84cefc", "neg": "#f37f7c"}
+colorbar_hovmoller = {"abs_lim": 10, "spacing": 2, "cmap": "BrBG"}
+colorbar_spatial_anomaly = {"abs_lim": 200, "spacing": 50, "cmap": "BrBG"}
