@@ -9,6 +9,7 @@ from conf import (
     color_dict,
     folder_figures,
     folder_insitu,
+    model_list_validation,
     violin_fill_color,
     zenodo_doi,
 )
@@ -30,7 +31,7 @@ else:
 
 # %% Calculate KGE
 metric_list = []
-models_list = ["GLEAM4", "GLEAM v3.8", "ERA5-Land", "FLUXCOM"]
+models_list = model_list_validation
 for model in models_list:
     df_val_tmp = (
         ds_validation.to_dataframe()

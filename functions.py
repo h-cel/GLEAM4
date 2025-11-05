@@ -1,14 +1,18 @@
+import logging
 import os
 import re
 import subprocess
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
+import matplotlib.colors as mcolors
 import matplotlib.pylab as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
+import xarray as xr
 from matplotlib.colors import ListedColormap
 from matplotlib.projections import PolarAxes
 from scipy.stats import gaussian_kde
@@ -105,7 +109,6 @@ def fun_taylor(
         pdframe = pdframe_subset[~pdframe_subset.isna().any(axis=1)]
 
         if len(pdframe) > 1:
-
             # calculate statistics
             cor_pearson = pdframe.corr(method="pearson")["insitu"][dataset_name]
 
@@ -217,7 +220,6 @@ def fun_taylor_prepare(path_in):
             pdframe = pdframe_subset[~pdframe_subset.isna().any(axis=1)]
 
             if len(pdframe) > 1:
-
                 # calculate statistics
                 cor_pearson = pdframe.corr(method="pearson")["insitu"][v]
 
@@ -551,6 +553,72 @@ class TaylorDiagramdensity(object):
         cbar.ax.tick_params(labelsize=20)
 
 
+# Function to make custom colormap of Diego
+def make_custom_cmap(vmin, vmax):
+    used_colors = ["Greys", "Greens", "Blues", "Purples"]
+    transitions = [0.125 * vmax, 0.35 * vmax, 0.65 * vmax]
+    # Define the percentages for the colormaps
+    percentages = [
+        (transitions[0] - vmin) / vmax,
+        (transitions[1] - transitions[0]) / vmax,
+        (transitions[2] - transitions[1]) / vmax,
+        (vmax - transitions[2]) / vmax,
+    ]
+    # Calculate the number of colors to take from each colormap
+    num_colors = [
+        int(p * 256) for p in percentages
+    ]  # amount of colors to take from each colorbar
+    colors = []
+    for i, cmap in enumerate(used_colors):
+        cm = plt.get_cmap(cmap)
+        if i != 0:
+            colors.extend(cm(np.linspace(0.25, 1, num=num_colors[i])))
+        else:
+            colors.extend(cm(np.linspace(0.05, 1, num=num_colors[i])))
+        # Start sampling the colormap only from 0.2 to prevent colors being too white
+    new_cmap = ListedColormap(colors, name="Custom_Cmap")
+    return new_cmap
+
+
+def make_custom_cmap_sotc(abs_lim, spacing, vmin, vmax, cmap):
+    """
+    Create a custom colormap for the State of the Climate plots.
+    We want a discrete colormap with specific spacing between -abs_lim and abs_lim.
+    All values in [vmin, -abs_lim] and [abs_lim, vmax] are grouped in 1 bin each.
+
+    Parameters
+    ----------
+    abs_lim: float or int
+        Absolute value of the limit of your colormap
+    spacing: float or int
+        Interval spacing covered by each bin of the colormap
+    vmin: float or int
+        Minimum value of your data
+    vmax: float or int
+        Maximum value of your data
+    cmap: string
+        Name of the matplotlib colormap to use as base
+
+    Returns
+    -------
+    inner_ticks: np.array
+        Tick values for the colorbar
+    new_cmap: matplotlib.colors.LinearSegmentedColormap
+        Custom colormap
+    norm: matplotlib.colors.BoundaryNorm
+        Normalization for the colormap
+    """
+    inner_ticks = np.arange(-abs_lim, abs_lim + spacing, spacing)
+    full_range = np.concatenate([[vmin], inner_ticks, [vmax]])
+    new_cmap = plt.get_cmap(cmap, len(full_range) - 1)
+    norm = mcolors.BoundaryNorm(
+        boundaries=full_range,  # Limits of the colorsbar
+        ncolors=new_cmap.N,
+        extend="neither",
+    )
+    return inner_ticks, new_cmap, norm
+
+
 def plot_taylor(path_in, path_out, format=".pdf"):
     """
     Create taylor plots for the 4 different datasets
@@ -676,3 +744,151 @@ def download_zenodo(zenodo_doi, output_folder):
         download_file.close()
         with zipfile.ZipFile(output_folder / zip_name) as zip_ref:
             zip_ref.extractall(output_folder / zip_root)
+
+
+def data_logging(path, script_path):
+    """
+    Set up logging for data downloading/processing scripts.
+
+    Parameters
+    ----------
+    path: pathlib.Path
+        Path to the directory where log files should be saved.
+    script_path: pathlib.Path or str
+        Path to the script that is being logged.
+    """
+    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(message)s",
+        handlers=[
+            logging.FileHandler(path / f"log_{current_datetime}.txt", mode="w"),
+            logging.StreamHandler(),
+        ],
+        force=True,
+    )
+    # Get useful information
+    git_commit = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
+    )
+    git_repo = (
+        subprocess.check_output(["git", "remote", "get-url", "origin"])
+        .strip()
+        .decode("utf-8")
+    )
+    # Log info
+    logging.info(f"Script run at: {current_datetime}")
+    logging.info(f"Script path: {script_path}")
+    logging.info(f"Git commit: {git_commit}")
+    logging.info(f"Git repo: {git_repo}")
+
+
+# Function to normalize the grid values
+# def normalize(array: np.ndarray) -> np.ndarray:
+#     """Normalizes numpy arrays into scale 0.0 - 1.0"""
+#     array_min, array_max = array.min(), array.max()
+#     return (array - array_min) / (array_max - array_min)
+
+
+# %% Functions below for calculating the area of a grid
+# These functions are taken from: https://github.com/lukegre/pySeaFlux/blob/3ecc2c7bedc121925be4056fa55f0e5a544eae64/pyseaflux/area.py
+# Minor modifications are added
+
+
+def earth_radius(lat):
+    """Calculate the radius of the earth for a given latitude
+
+    Formula as e.g. given in https://en.wikipedia.org/wiki/Earth_radius#Geocentric_radius
+
+    Parameters
+    -----------
+    lat: array_like, float
+        latitude value (-90 : 90)
+
+    Returns
+    -------
+        array_like, float: radius in metres
+    """
+
+    lat = np.deg2rad(lat)
+    a = 6378137.0  # equatorial radius in metres
+    b = 6356752.0  # polar radius in metres
+    r = (
+        ((a**2 * np.cos(lat)) ** 2 + (b**2 * np.sin(lat)) ** 2)
+        / ((a * np.cos(lat)) ** 2 + (b * np.sin(lat)) ** 2)
+    ) ** 0.5
+
+    return r
+
+
+def area_grid(lat, lon, return_dataarray=False):
+    """
+    Calculate the area of each grid cell for given lats and lons
+
+    Note that in spherical coordinate system (following [2]):
+    - lat = 90° - phi with phi the colatitude
+    - lon = theta
+
+    Parameters
+    ----------
+    lat : array_like
+        Latitudes in decimal degrees of length N
+    lon : array_like
+        Longitudes in decimal degrees of length M
+    return_dataarray : bool, optional
+        If True returns xr.DataArray, else numpy array. Default is False.
+
+    Returns
+    -------
+    area : numpy.ndarray or xarray.DataArray
+        Area of each grid cell in square meters. Shape is (M, N) if
+        return_dataarray=False, or DataArray with dims ['lat', 'lon']
+        if return_dataarray=True.
+
+    References
+    ----------
+    .. [1] https://github.com/chadagreene/CDT/blob/master/cdt/cdtarea.m
+    .. [2] https://mathworld.wolfram.com/SphericalCoordinates.html
+
+    """
+    ylat, xlon = np.meshgrid(lat, lon)
+    R = earth_radius(ylat)
+
+    # Calculate width and height of each pixel in radians
+    dlat = np.deg2rad(np.abs(np.gradient(ylat, axis=1)))
+    dlon = np.deg2rad(np.abs(np.gradient(xlon, axis=0)))
+
+    # Area based on calculation of unit area
+    dy = dlat * R
+    dx = dlon * R * np.cos(np.deg2rad(ylat))
+    area = dy * dx
+
+    if not return_dataarray:
+        return area
+    else:
+        xda = xr.DataArray(
+            area.T,
+            dims=["lat", "lon"],
+            coords={"lat": lat, "lon": lon},
+            attrs=dict(
+                long_name="Area per pixel",
+                units="m^2",
+                description=(
+                    "Area per pixel. The non-spherical shape of Earth is taken into account."
+                ),
+            ),
+        )
+
+        return xda
+
+
+def get_area_from_dataset(da):
+    """
+    Calculate the grid cell area from a xr.Dataset or xr.DataArray.
+    """
+    x = da.lon.values
+    y = da.lat.values
+
+    area = area_grid(y, x, return_dataarray=True)
+
+    return area
