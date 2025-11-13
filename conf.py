@@ -13,7 +13,7 @@ GEE_PROJECT_ID = "ee-bonteolivier15"  # Replace by your own project ID
 
 # %% Paths
 folder_insitu = Path(
-    "/data/gent/vo/000/gvo00090/GLEAM/data/data/in_situ_data/GLEAM4_validation/cleaned_v42b_retrain_folder"
+    "/data/gent/vo/000/gvo00090/GLEAM/data/data/in_situ_data/GLEAM4_validation/cleaned_v42_DA"
 )
 folder_figures = root_path / "figures"
 
