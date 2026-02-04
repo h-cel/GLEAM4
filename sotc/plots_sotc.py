@@ -221,6 +221,7 @@ fig, ax = plt.subplots(
     subplot_kw={"projection": ccrs.Robinson(central_longitude=-25)},
 )
 img = da_spatial_anomaly.isel(time=0).plot(
+    x="lon",y="lat",
     ax=ax,
     transform=ccrs.PlateCarree(),
     cmap=cmap_spatial_anom,
