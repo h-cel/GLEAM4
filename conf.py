@@ -19,7 +19,7 @@ folder_figures = root_path / "figures"
 
 # GLEAM 4 Paths
 folder_gridded = Path(
-    "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.2a/GLEAM4.2_DA/processed"
+    "/scratch/gent/vo/000/gvo00090/GLEAM/data/GLEAM4/GLEAM4_outputs/output/GLEAM4.3a/GLEAM4.3a_OL/processed_Oscar"
 )  # Adapt this path for your computer: point to folder with
 # GLEAM outputs as found on the SFTP server (https://www.gleam.eu/#downloads)
 folder_gridded_monthly = folder_gridded / "monthly"
@@ -29,7 +29,7 @@ folder_gridded_yearly = folder_gridded / "yearly"
 folder_processed = root_path / "data" / "processed"
 folder_sotc = root_path / "data" / "sotc"
 
-model_version = "GLEAM4.2a"
+model_version = "GLEAM4.3a"
 seasonal_averages_file = f"{model_version}_seasonal_averages.nc"
 yearly_averages_file = f"{model_version}_yearly_averages.nc"
 yearly_averages_file_comparison = f"{model_version}_yearly_averages_comparison.nc"
@@ -111,7 +111,7 @@ site_selection = {
 
 # %% SotC options
 base_period = ["1991", "2020"]
-year_of_interest = "2024"
+year_of_interest = "2025"
 dict_region = {
     "global": {"lat_min": -90, "lat_max": 90, "color": "#0b141c", "label": "Globe"},
     "NH": {
