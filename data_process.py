@@ -4,6 +4,7 @@ import logging
 import re
 
 import xarray as xr
+from dask.distributed import Client
 
 import conf
 import functions
@@ -34,6 +35,8 @@ folder_figures.mkdir(exist_ok=True)
 
 # %% Set up logging
 data_logging(folder_processed, __file__)
+client = Client()
+logging.info(f"Dask client set up, dashboard link:{client.dashboard_link}")
 
 # %% Read in GLEAM4 data
 logging.info(f"GLEAM4 model version: {model_version}")
