@@ -609,7 +609,11 @@ def make_custom_cmap_sotc(abs_lim, spacing, vmin, vmax, cmap):
         Normalization for the colormap
     """
     inner_ticks = np.arange(-abs_lim, abs_lim + spacing, spacing)
-    full_range = np.concatenate([[vmin], inner_ticks, [vmax]])
+    full_range = inner_ticks
+    if vmin < -abs_lim:
+        full_range = np.concatenate([[vmin], full_range])
+    if vmax > abs_lim:
+        full_range = np.concatenate([full_range, [vmax]])
     new_cmap = plt.get_cmap(cmap, len(full_range) - 1)
     norm = mcolors.BoundaryNorm(
         boundaries=full_range,  # Limits of the colorsbar
